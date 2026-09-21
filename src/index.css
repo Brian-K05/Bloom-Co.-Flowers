@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Cormorant Garamond", "Times New Roman", serif;
+  --font-sans: "Outfit", "Segoe UI", sans-serif;
+
+  --color-ivory: #f6f1e8;
+  --color-cream: #fbf8f3;
+  --color-paper: #fffcf8;
+  --color-ink: #2a2724;
+  --color-muted: #6b645c;
+  --color-rose: #7a3e48;
+  --color-rose-deep: #5c2e38;
+  --color-sage: #5a6b5a;
+  --color-gold: #c4a574;
+  --color-gold-soft: #d4c0a1;
+  --color-line: #e4dcd0;
+  --color-blush: #f3e7e4;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100svh;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: #ead8d4;
+  color: var(--color-ink);
+}
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-ink);
+}
+
+.field-underline {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--color-line);
+  background: transparent;
+  padding: 0.65rem 0;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+}
+
+.field-underline:focus {
+  border-color: var(--color-ink);
+}
+
+.page-enter {
+  animation: page-enter 420ms ease;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.toast-enter {
+  animation: toast-enter 280ms ease;
+}
+
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100dvh;
+  background-color: #f6f1e8;
+  color: #2a2724;
+}
+
+.mobile-overlay--search {
+  display: block;
+  overflow-y: auto;
+}
+
+@media (min-width: 1024px) {
+  .mobile-overlay--nav {
+    display: none;
+  }
+}
+
+@media print {
+  header,
+  footer,
+  .no-print,
+  .mobile-overlay {
+    display: none !important;
+  }
+}

@@ -27,7 +27,7 @@ export function ThemePreviewPage() {
                 active ? 'border-rose' : 'border-line'
               } bg-paper`}
             >
-              <div className="aspect-[16/10] overflow-hidden bg-[#eee6da]">
+              <div className="aspect-[16/10] overflow-hidden bg-image-wash">
                 <img
                   src={item.mockup}
                   alt={`${item.name} homepage mockup`}

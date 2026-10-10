@@ -25,7 +25,7 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <article className="group">
       <Link to={`/product/${product.id}`} className="block overflow-hidden">
-        <div className="relative aspect-[3/4] overflow-hidden bg-[#eee6da]">
+        <div className="relative aspect-[3/4] overflow-hidden bg-image-wash">
           <BloomImage
             src={product.images[0]}
             alt={product.name}

@@ -22,7 +22,7 @@ export function BloomImage({ src, alt, className = '', imgClassName = '', eager 
   // Do not force `relative` here — callers often pass `absolute`, and a later
   // `relative` utility in the CSS bundle would win and break overlays.
   return (
-    <div className={`overflow-hidden bg-[#eee6da] ${className}`}>
+    <div className={`overflow-hidden bg-image-wash ${className}`}>
       <img
         ref={imgRef}
         src={src}

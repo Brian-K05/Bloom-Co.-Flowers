@@ -16,6 +16,8 @@
   --color-gold-soft: #d4c0a1;
   --color-line: #e4dcd0;
   --color-blush: #f3e7e4;
+  --color-image-wash: #eee6da;
+  --color-selection: #ead8d4;
 }
 
 html {
@@ -37,6 +39,8 @@ html[data-theme='atelier'] {
   --color-gold-soft: #d4c0a1;
   --color-line: #e4dcd0;
   --color-blush: #f3e7e4;
+  --color-image-wash: #eee6da;
+  --color-selection: #ead8d4;
   --font-display: "Cormorant Garamond", "Times New Roman", serif;
   --font-sans: "Outfit", "Segoe UI", sans-serif;
 }
@@ -54,8 +58,10 @@ html[data-theme='garden'] {
   --color-gold-soft: #d2c4a6;
   --color-line: #d7e3da;
   --color-blush: #f3e9ea;
-  --font-display: "Cormorant Garamond", "Times New Roman", serif;
-  --font-sans: "Outfit", "Segoe UI", sans-serif;
+  --color-image-wash: #e4ebe3;
+  --color-selection: #d8e8dc;
+  --font-display: "Fraunces", "Times New Roman", serif;
+  --font-sans: "DM Sans", "Segoe UI", sans-serif;
 }
 
 html[data-theme='noir'] {
@@ -71,8 +77,10 @@ html[data-theme='noir'] {
   --color-gold-soft: #d8c7a8;
   --color-line: #3a342f;
   --color-blush: #2a2224;
-  --font-display: "Cormorant Garamond", "Times New Roman", serif;
-  --font-sans: "Outfit", "Segoe UI", sans-serif;
+  --color-image-wash: #2a2420;
+  --color-selection: #4a3034;
+  --font-display: "Playfair Display", "Times New Roman", serif;
+  --font-sans: "Manrope", "Segoe UI", sans-serif;
 }
 
 body {
@@ -101,7 +109,7 @@ h4 {
 }
 
 ::selection {
-  background: #ead8d4;
+  background: var(--color-selection);
   color: var(--color-ink);
 }
 
@@ -180,8 +188,8 @@ select:focus {
   flex-direction: column;
   width: 100vw;
   height: 100dvh;
-  background-color: #f6f1e8;
-  color: #2a2724;
+  background-color: var(--color-ivory);
+  color: var(--color-ink);
 }
 
 .mobile-overlay--search {

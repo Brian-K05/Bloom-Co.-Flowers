@@ -199,7 +199,7 @@ export function HomePage() {
           alt="Deep red seasonal blooms"
           className="min-h-[380px] lg:min-h-[560px]"
         />
-        <div className="flex flex-col justify-center bg-[#f3e7e4]/70 px-6 py-16 sm:px-12 lg:px-16">
+        <div className="flex flex-col justify-center bg-blush/70 px-6 py-16 sm:px-12 lg:px-16">
           <p className="text-[11px] uppercase tracking-[0.28em] text-rose">Seasonal</p>
           <h2 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">Valentine’s Collection</h2>
           <p className="mt-5 max-w-md leading-relaxed text-muted">

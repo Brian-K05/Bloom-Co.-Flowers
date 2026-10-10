@@ -59,7 +59,7 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-line/80 bg-[#f6f1e8]/92 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-line/80 bg-ivory/92 backdrop-blur-md">
         <p className="hidden border-b border-line/60 px-4 py-2 text-center text-[11px] tracking-[0.12em] text-muted sm:block">
           Same-day delivery for selected Metro Manila areas
         </p>
@@ -125,64 +125,50 @@ export function Header() {
               role="dialog"
               aria-modal="true"
               aria-label="Menu"
-              style={{
-                position: 'fixed',
-                top: 0,
-                right: 0,
-                bottom: 0,
-                left: 0,
-                zIndex: 9999,
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100vw',
-                height: '100dvh',
-                backgroundColor: '#f6f1e8',
-                color: '#2a2724',
-              }}
             >
-              <div
-                className="flex items-center justify-between border-b border-[#e4dcd0] px-5 py-4"
-                style={{ backgroundColor: '#f6f1e8' }}
-              >
+              <div className="flex items-center justify-between border-b border-line bg-ivory px-5 py-4">
                 <span className="font-display text-2xl tracking-[0.12em]">Bloom & Co.</span>
                 <button type="button" aria-label="Close menu" onClick={() => setOpen(false)}>
                   <X />
                 </button>
               </div>
-              <nav
-                className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-10"
-                style={{ backgroundColor: '#f6f1e8' }}
-              >
+              <nav className="flex flex-1 flex-col gap-5 overflow-y-auto bg-ivory px-6 py-10">
                 {links.map((link) => (
                   <NavLink
                     key={link.to}
                     to={link.to}
                     end={link.to === '/'}
                     className={({ isActive }) =>
-                      `font-display text-4xl ${isActive ? 'text-[#7a3e48]' : 'text-[#2a2724]'}`
+                      `font-display text-4xl ${isActive ? 'text-rose' : 'text-ink'}`
                     }
                   >
                     {link.label}
                   </NavLink>
                 ))}
-                <div className="mt-6 space-y-4 border-t border-[#e4dcd0] pt-6">
+                <div className="mt-6 space-y-4 border-t border-line pt-6">
                   <Link
                     to="/account"
-                    className="block text-[12px] uppercase tracking-[0.22em] text-[#6b645c]"
+                    className="block text-[12px] uppercase tracking-[0.22em] text-muted"
                   >
                     Account
                   </Link>
                   <Link
                     to="/orders"
-                    className="block text-[12px] uppercase tracking-[0.22em] text-[#6b645c]"
+                    className="block text-[12px] uppercase tracking-[0.22em] text-muted"
                   >
                     Orders
                   </Link>
                   <Link
                     to="/cart"
-                    className="block text-[12px] uppercase tracking-[0.22em] text-[#6b645c]"
+                    className="block text-[12px] uppercase tracking-[0.22em] text-muted"
                   >
                     Cart{cartCount > 0 ? ` (${cartCount})` : ''}
+                  </Link>
+                  <Link
+                    to="/preview-themes"
+                    className="block text-[12px] uppercase tracking-[0.22em] text-muted"
+                  >
+                    Design themes
                   </Link>
                 </div>
               </nav>
@@ -198,23 +184,10 @@ export function Header() {
               role="dialog"
               aria-modal="true"
               aria-label="Search"
-              style={{
-                position: 'fixed',
-                top: 0,
-                right: 0,
-                bottom: 0,
-                left: 0,
-                zIndex: 9999,
-                overflowY: 'auto',
-                width: '100vw',
-                height: '100dvh',
-                backgroundColor: '#f6f1e8',
-                color: '#2a2724',
-              }}
             >
               <div className="mx-auto max-w-2xl px-5 py-8">
                 <div className="mb-8 flex items-center justify-between">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-[#7a3e48]">
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-rose">
                     Search the atelier
                   </p>
                   <button
@@ -231,7 +204,7 @@ export function Header() {
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
                     placeholder="Search roses, boxes, birthdays..."
-                    className="w-full border-b border-[#2a2724] bg-transparent py-3 font-display text-3xl outline-none placeholder:text-[#2a2724]/30"
+                    className="w-full border-b border-ink bg-transparent py-3 font-display text-3xl text-ink outline-none placeholder:text-ink/30"
                   />
                 </form>
                 <div className="mt-8 space-y-4">
@@ -239,17 +212,17 @@ export function Header() {
                     <Link
                       key={product.id}
                       to={`/product/${product.id}`}
-                      className="flex items-center justify-between gap-4 border-b border-[#e4dcd0] py-3"
+                      className="flex items-center justify-between gap-4 border-b border-line py-3"
                     >
                       <div>
                         <p className="font-display text-2xl">{product.name}</p>
-                        <p className="text-sm text-[#6b645c]">{product.shortDescription}</p>
+                        <p className="text-sm text-muted">{product.shortDescription}</p>
                       </div>
                       <p className="text-sm">{formatPHP(product.price)}</p>
                     </Link>
                   ))}
                   {query && !results.length ? (
-                    <p className="text-[#6b645c]">No arrangements found for “{query}”.</p>
+                    <p className="text-muted">No arrangements found for “{query}”.</p>
                   ) : null}
                 </div>
               </div>

@@ -11,9 +11,9 @@ export function ConceptGalleryPage() {
 
   return (
     <div className="bg-ivory">
-      <section className="border-b border-line px-5 py-16 lg:px-10 lg:py-24">
+      <section className="border-b border-line px-5 py-12 sm:py-16 lg:px-10 lg:py-24">
         <p className="text-[11px] uppercase tracking-[0.32em] text-rose">Design showcase</p>
-        <h1 className="mt-4 max-w-3xl font-display text-5xl leading-[0.95] sm:text-6xl lg:text-7xl">
+        <h1 className="mt-4 max-w-3xl font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl lg:text-7xl">
           10 flower shop concepts
         </h1>
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">

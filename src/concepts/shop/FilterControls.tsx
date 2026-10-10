@@ -89,9 +89,9 @@ export function FilterControls({
 export function PriceMeter({ catalog }: { catalog: ShopCatalog }) {
   const { maxPrice, priceCeiling, setMaxPrice, filtered } = catalog
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4">
-      <label className="flex items-center gap-3 text-sm text-muted">
-        Up to ₱{maxPrice.toLocaleString('en-PH')}
+    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
+      <label className="flex min-w-0 flex-1 flex-col gap-2 text-sm text-muted sm:flex-row sm:items-center sm:gap-3">
+        <span className="shrink-0">Up to ₱{maxPrice.toLocaleString('en-PH')}</span>
         <input
           type="range"
           min={1450}
@@ -99,7 +99,7 @@ export function PriceMeter({ catalog }: { catalog: ShopCatalog }) {
           step={50}
           value={maxPrice}
           onChange={(event) => setMaxPrice(Number(event.target.value))}
-          className="w-36 accent-rose sm:w-44"
+          className="w-full max-w-full accent-rose sm:w-44"
         />
       </label>
       <p className="text-sm text-muted">{filtered.length} arrangements</p>

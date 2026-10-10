@@ -28,10 +28,10 @@ export function Layout() {
   }, [location.pathname])
 
   return (
-    <div className={`flex min-h-svh flex-col ${shellBg[conceptId]}`}>
+    <div className={`flex min-h-svh max-w-[100vw] flex-col overflow-x-clip ${shellBg[conceptId]}`}>
       <CustomCursor />
       <Header />
-      <main className="page-enter flex-1" key={location.pathname}>
+      <main className="page-enter min-w-0 flex-1" key={location.pathname}>
         <Outlet />
       </main>
       <Footer />

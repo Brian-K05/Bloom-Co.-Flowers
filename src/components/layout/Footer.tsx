@@ -58,7 +58,7 @@ export function Footer() {
           <p className="mt-4 text-sm text-muted">
             {concept.number} · {concept.name}
           </p>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 grid grid-cols-5 gap-2 sm:flex sm:flex-wrap">
             {concepts.map((item) => (
               <Link
                 key={item.id}
@@ -66,8 +66,12 @@ export function Footer() {
                 onClick={() => setConcept(item.id as ConceptId)}
                 title={item.name}
                 aria-current={conceptId === item.id ? 'page' : undefined}
-                className={`border px-2 py-1 text-[10px] uppercase tracking-[0.1em] ${
-                  conceptId === item.id ? 'border-rose text-rose' : 'border-line text-muted hover:text-ink'
+                className={`border px-2 py-2 text-center text-[10px] uppercase tracking-[0.1em] sm:py-1 ${
+                  conceptId === item.id
+                    ? 'border-rose text-rose'
+                    : dark
+                      ? 'border-white/20 text-paper/70 hover:text-paper'
+                      : 'border-line text-muted hover:text-ink'
                 }`}
               >
                 {item.number}

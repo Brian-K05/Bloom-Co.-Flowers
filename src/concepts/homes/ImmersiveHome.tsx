@@ -68,7 +68,7 @@ export function ImmersiveHome() {
 
       {/* Interactive mood selector */}
       <section className="relative z-20 px-6 pb-4 sm:px-10 lg:px-16">
-        <div className="mx-auto max-w-3xl rounded-sm border border-accent/30 bg-paper/80 p-6 shadow-[0_0_40px_rgba(34,211,238,0.12)] backdrop-blur-md sm:p-8">
+        <div className="mx-auto max-w-3xl rounded-sm border border-accent/30 bg-paper/80 p-4 shadow-[0_0_40px_rgba(34,211,238,0.12)] backdrop-blur-md sm:p-8">
           <p className="text-center text-[10px] uppercase tracking-[0.35em] text-muted">Set your mood</p>
           <div className="mt-5 flex flex-wrap justify-center gap-2" role="tablist" aria-label="Mood filter">
             {moodFilters.map((mood) => {
@@ -80,7 +80,7 @@ export function ImmersiveHome() {
                   role="tab"
                   aria-selected={selected}
                   onClick={() => setMoodId(mood.id)}
-                  className={`min-h-11 px-5 py-2 text-[11px] uppercase tracking-[0.22em] transition ${
+                  className={`min-h-11 min-w-[44%] px-4 py-2 text-[11px] uppercase tracking-[0.18em] transition sm:min-w-0 sm:px-5 sm:tracking-[0.22em] ${
                     selected
                       ? 'bg-accent text-on-accent'
                       : 'border border-line text-muted hover:border-accent hover:text-ink'

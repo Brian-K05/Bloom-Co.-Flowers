@@ -31,7 +31,7 @@ type Chrome = {
 const chromeByConcept: Record<ConceptId, Chrome> = {
   'elegant-minimal': {
     bar: 'border-b border-line/60 bg-ivory/95 backdrop-blur-md',
-    brand: 'font-display text-[26px] tracking-[0.1em]',
+    brand: 'font-display tracking-[0.1em] sm:text-[26px]',
     tagline: 'hidden',
     nav: 'text-[11px] uppercase tracking-[0.22em] text-ink hover:text-rose',
     navActive: 'text-rose',
@@ -39,19 +39,19 @@ const chromeByConcept: Record<ConceptId, Chrome> = {
     layout: 'centered',
   },
   'dark-luxury': {
-    bar: 'border-b border-white/10 bg-ink/95 text-paper backdrop-blur-md',
-    brand: 'font-display text-[24px] tracking-[0.12em] text-paper',
+    bar: 'border-b border-white/10 bg-[#0c0b0a]/95 text-ink backdrop-blur-md',
+    brand: 'font-display tracking-[0.12em] text-ink sm:text-[24px]',
     tagline: 'mt-1 hidden text-[10px] uppercase tracking-[0.22em] text-gold sm:block',
-    nav: 'text-[11px] uppercase tracking-[0.22em] text-paper/70 hover:text-gold',
+    nav: 'text-[11px] uppercase tracking-[0.22em] text-ink/80 hover:text-gold',
     navActive: 'text-gold',
-    icon: 'text-paper',
+    icon: 'text-ink',
     banner: 'border-b border-white/10 bg-black text-gold/90',
     bannerText: 'Evening delivery windows available in selected Metro Manila areas',
     layout: 'standard',
   },
   'bright-playful': {
     bar: 'border-b border-rose/20 bg-cream/95 backdrop-blur-md',
-    brand: 'font-display text-[28px] font-bold tracking-tight text-rose',
+    brand: 'font-display font-bold tracking-tight text-rose sm:text-[28px]',
     tagline: 'mt-0.5 hidden text-[10px] font-semibold uppercase tracking-[0.16em] text-muted sm:block',
     nav: 'rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink hover:bg-rose/10',
     navActive: 'bg-rose text-on-accent hover:bg-rose',
@@ -60,7 +60,7 @@ const chromeByConcept: Record<ConceptId, Chrome> = {
   },
   'rustic-warm': {
     bar: 'border-b border-[#d9cbb8] bg-[#f3ebe1]/95 backdrop-blur-md',
-    brand: 'font-display text-[26px] italic tracking-[0.04em]',
+    brand: 'font-display italic tracking-[0.04em] sm:text-[26px]',
     tagline: 'mt-1 hidden text-[10px] uppercase tracking-[0.18em] text-[#7a6a55] sm:block',
     nav: 'text-[12px] text-[#5c4e3c] hover:text-ink',
     navActive: 'text-ink underline underline-offset-4',
@@ -69,7 +69,7 @@ const chromeByConcept: Record<ConceptId, Chrome> = {
   },
   'modern-bold': {
     bar: 'border-b-4 border-ink bg-paper',
-    brand: 'font-display text-[28px] font-bold uppercase tracking-tighter',
+    brand: 'font-display font-bold uppercase tracking-tighter sm:text-[28px]',
     tagline: 'hidden',
     nav: 'text-[11px] font-bold uppercase tracking-[0.18em] text-ink hover:text-rose',
     navActive: 'text-rose',
@@ -78,7 +78,7 @@ const chromeByConcept: Record<ConceptId, Chrome> = {
   },
   'romantic-editorial': {
     bar: 'border-b border-rose/20 bg-[#fbf7f4]/95 backdrop-blur-md',
-    brand: 'font-display text-[26px] italic tracking-[0.06em]',
+    brand: 'font-display italic tracking-[0.06em] sm:text-[26px]',
     tagline: 'mt-1 hidden text-[10px] uppercase tracking-[0.2em] text-rose/80 sm:block',
     nav: 'text-[11px] uppercase tracking-[0.2em] text-muted hover:text-rose',
     navActive: 'text-rose',
@@ -86,17 +86,17 @@ const chromeByConcept: Record<ConceptId, Chrome> = {
     layout: 'standard',
   },
   'artistic-photographic': {
-    bar: 'border-b border-white/10 bg-[#11160f]/90 text-paper backdrop-blur-md',
-    brand: 'font-display text-[22px] tracking-[0.28em] text-paper',
+    bar: 'border-b border-white/15 bg-[#11160f]/95 text-ink backdrop-blur-md',
+    brand: 'font-display tracking-[0.18em] text-photo-fg sm:text-[22px] sm:tracking-[0.28em]',
     tagline: 'hidden',
-    nav: 'text-[10px] uppercase tracking-[0.28em] text-paper/60 hover:text-paper',
-    navActive: 'text-paper',
-    icon: 'text-paper',
+    nav: 'text-[10px] uppercase tracking-[0.28em] text-photo-fg/85 hover:text-photo-fg',
+    navActive: 'text-photo-fg',
+    icon: 'text-photo-fg',
     layout: 'minimal',
   },
   'scandinavian-nature': {
     bar: 'border-b border-line bg-paper/95 backdrop-blur-md',
-    brand: 'font-display text-[22px] tracking-[0.2em]',
+    brand: 'font-display tracking-[0.16em] sm:text-[22px] sm:tracking-[0.2em]',
     tagline: 'mt-1 hidden text-[10px] uppercase tracking-[0.2em] text-sage sm:block',
     nav: 'text-[11px] uppercase tracking-[0.2em] text-muted hover:text-ink',
     navActive: 'text-ink',
@@ -104,19 +104,19 @@ const chromeByConcept: Record<ConceptId, Chrome> = {
     layout: 'standard',
   },
   'interactive-immersive': {
-    bar: 'border-b border-accent/20 bg-[#070b16]/85 text-paper backdrop-blur-xl',
-    brand: 'font-display text-[20px] tracking-[0.3em] text-accent',
+    bar: 'border-b border-accent/20 bg-[#070b16]/90 text-ink backdrop-blur-xl',
+    brand: 'font-display tracking-[0.16em] text-accent sm:text-[20px] sm:tracking-[0.3em]',
     tagline: 'hidden',
-    nav: 'text-[10px] uppercase tracking-[0.28em] text-paper/70 hover:text-accent',
+    nav: 'text-[10px] uppercase tracking-[0.28em] text-ink/85 hover:text-accent',
     navActive: 'text-accent',
-    icon: 'text-paper',
+    icon: 'text-ink',
     banner: 'border-b border-accent/20 bg-[#0c1224] text-accent/90',
     bannerText: 'Mood filters live — set your vibe in shop',
     layout: 'glass',
   },
   'local-boutique': {
     bar: 'border-b border-[#e0d4c4] bg-[#f7f1e8]/95 backdrop-blur-md',
-    brand: 'font-display text-[24px] tracking-[0.04em]',
+    brand: 'font-display tracking-[0.04em] sm:text-[24px]',
     tagline: 'mt-1 hidden text-[10px] uppercase tracking-[0.16em] text-[#2f5d3a] sm:block',
     nav: 'text-[12px] text-muted hover:text-[#2f5d3a]',
     navActive: 'font-semibold text-[#2f5d3a]',
@@ -223,10 +223,10 @@ export function ConceptHeader() {
   )
 
   const brandBlock = (
-    <Link to="/" className="text-center">
-      <span className={`block leading-none ${chrome.brand}`}>{concept.brand}</span>
+    <Link to="/" className="min-w-0 max-w-[48vw] text-center sm:max-w-none">
+      <span className={`block truncate text-[1.125rem] leading-none ${chrome.brand}`}>{concept.brand}</span>
       {chrome.tagline !== 'hidden' ? (
-        <span className={`max-w-[220px] truncate ${chrome.tagline}`}>{concept.tagline}</span>
+        <span className={`mx-auto max-w-[220px] truncate ${chrome.tagline}`}>{concept.tagline}</span>
       ) : null}
     </Link>
   )
@@ -234,10 +234,10 @@ export function ConceptHeader() {
   let shell: ReactNode
   if (chrome.layout === 'centered') {
     shell = (
-      <div className="mx-auto max-w-7xl px-5 py-4 lg:px-8">
-        <div className="flex items-center justify-between gap-4">
+      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-5 sm:py-4 lg:px-8">
+        <div className="flex items-center justify-between gap-3 sm:gap-4">
           {menuButton}
-          <div className="flex-1 lg:text-center">{brandBlock}</div>
+          <div className="min-w-0 flex-1 lg:text-center">{brandBlock}</div>
           {actions}
         </div>
         <nav className="mt-4 hidden items-center justify-center gap-8 lg:flex">
@@ -247,9 +247,9 @@ export function ConceptHeader() {
     )
   } else if (chrome.layout === 'split-bold') {
     shell = (
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-5 lg:px-8">
         {menuButton}
-        {brandBlock}
+        <div className="min-w-0 flex-1 lg:flex-none">{brandBlock}</div>
         <nav className="hidden items-center gap-6 lg:flex">
           <NavLinks chrome={chrome} />
         </nav>
@@ -258,9 +258,9 @@ export function ConceptHeader() {
     )
   } else if (chrome.layout === 'minimal') {
     shell = (
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-5 sm:py-4 lg:px-8">
         {menuButton}
-        {brandBlock}
+        <div className="min-w-0 flex-1 lg:flex-none">{brandBlock}</div>
         <nav className="hidden items-center gap-6 lg:flex">
           <NavLinks chrome={chrome} />
         </nav>
@@ -269,9 +269,9 @@ export function ConceptHeader() {
     )
   } else {
     shell = (
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-5 sm:py-4 lg:px-8">
         {menuButton}
-        {brandBlock}
+        <div className="min-w-0 flex-1 lg:flex-none">{brandBlock}</div>
         <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
           <NavLinks chrome={chrome} />
         </nav>

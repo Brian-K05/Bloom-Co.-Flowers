@@ -106,6 +106,17 @@ test.describe('shopping flows', () => {
     await expect(page.getByRole('link', { name: 'Shop' }).first()).toBeVisible()
   })
 
+  test('mobile concept shop stays usable', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/concepts/09-interactive-immersive')
+    await page.getByRole('button', { name: /open menu/i }).click()
+    await page.getByRole('dialog', { name: /menu/i }).getByRole('link', { name: 'Shop' }).click()
+    await expect(page).toHaveURL(/\/shop/)
+    await expect(page.getByRole('heading', { name: /discover your bouquet/i })).toBeVisible()
+    const noHorizontalBleed = await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2)
+    expect(noHorizontalBleed).toBeTruthy()
+  })
+
   test('category filter updates shop', async ({ page }) => {
     await page.goto('/concepts/01-elegant-minimal')
     await page.goto('/shop')

@@ -36,7 +36,7 @@ export function ArtisticPhotoHome() {
         <div className="absolute inset-0 bg-black/35" aria-hidden />
         <div className="relative z-10 flex min-h-[92svh] flex-col justify-end px-6 pb-14 pt-28 sm:px-10 lg:px-16 lg:pb-20">
           <p className="text-[10px] uppercase tracking-[0.45em] text-photo-fg/80">{concept.brand}</p>
-          <h1 className="mt-4 max-w-4xl font-display text-5xl font-light leading-[0.95] text-photo-fg sm:text-7xl lg:text-8xl">
+          <h1 className="mt-4 max-w-4xl font-display text-4xl font-light leading-[0.95] text-photo-fg sm:text-6xl md:text-7xl lg:text-8xl">
             {concept.tagline}
           </h1>
           <p className="mt-6 max-w-md text-sm leading-relaxed text-photo-fg/80">{concept.description}</p>
@@ -91,12 +91,12 @@ export function ArtisticPhotoHome() {
             Full catalog
           </Link>
         </div>
-        <div className="no-scrollbar flex gap-4 overflow-x-auto px-6 pb-4 sm:px-10 lg:px-16">
+        <div className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 sm:px-10 lg:px-16">
           {bestsellers.map((product) => (
             <Link
               key={product.id}
               to={`/product/${product.id}`}
-              className="group w-[72vw] shrink-0 sm:w-[280px] lg:w-[320px]"
+              className="group w-[72vw] shrink-0 snap-start sm:w-[280px] lg:w-[320px]"
             >
               <div className="relative aspect-[3/4] overflow-hidden bg-image-wash">
                 <BloomImage

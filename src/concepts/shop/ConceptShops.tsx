@@ -23,9 +23,9 @@ function Empty({ catalog }: { catalog: ShopCatalog }) {
 function ElegantMinimalShop({ catalog }: { catalog: ShopCatalog }) {
   return (
     <div className="bg-ivory">
-      <section className="mx-auto max-w-3xl px-6 pb-10 pt-20 text-center lg:pt-28">
+      <section className="mx-auto max-w-3xl px-5 pb-10 pt-14 text-center sm:px-6 sm:pt-20 lg:pt-28">
         <p className="text-[11px] uppercase tracking-[0.32em] text-muted">The collection</p>
-        <h1 className="mt-4 font-display text-5xl leading-[1.05] sm:text-6xl">Quiet blooms</h1>
+        <h1 className="mt-4 font-display text-4xl leading-[1.05] sm:text-5xl md:text-6xl">Quiet blooms</h1>
         <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-muted">
           A calm edit of roses, bouquets, and boxes — priced in Philippine pesos.
         </p>
@@ -54,33 +54,37 @@ function DarkLuxuryShop({ catalog }: { catalog: ShopCatalog }) {
   const rest = catalog.filtered.slice(1)
 
   return (
-    <div className="min-h-svh bg-ink text-paper">
-      <div className="border-b border-white/10 px-6 py-14 lg:px-12">
+    <div className="min-h-svh bg-[#0c0b0a] text-ink">
+      <div className="border-b border-white/10 px-5 py-10 sm:px-6 sm:py-14 lg:px-12">
         <p className="text-[11px] uppercase tracking-[0.35em] text-gold">Atelier edit</p>
-        <h1 className="mt-3 font-display text-5xl text-paper sm:text-6xl">Shop the night</h1>
+        <h1 className="mt-3 font-display text-4xl text-ink sm:text-5xl md:text-6xl">Shop the night</h1>
       </div>
       <div className="grid lg:grid-cols-[280px_1fr]">
-        <aside className="border-b border-white/10 px-6 py-8 lg:sticky lg:top-24 lg:h-fit lg:border-b-0 lg:border-r lg:border-white/10 lg:px-8 lg:py-12">
-          <FilterControls catalog={catalog} variant="solid" className="grid gap-5 [&_label]:text-paper/60 [&_input]:text-paper [&_select]:bg-ink [&_select]:text-paper [&_select]:border-white/20" />
-          <div className="mt-6 text-paper/70">
+        <aside className="border-b border-white/10 px-5 py-8 sm:px-6 lg:sticky lg:top-24 lg:h-fit lg:border-b-0 lg:border-r lg:border-white/10 lg:px-8 lg:py-12">
+          <FilterControls
+            catalog={catalog}
+            variant="solid"
+            className="grid gap-5 [&_label]:text-ink/60 [&_input]:border-white/20 [&_input]:bg-transparent [&_input]:text-ink [&_select]:border-white/20 [&_select]:bg-[#141211] [&_select]:text-ink"
+          />
+          <div className="mt-6 text-ink/70">
             <PriceMeter catalog={catalog} />
           </div>
         </aside>
-        <div className="px-6 py-10 lg:px-12 lg:py-14">
+        <div className="px-5 py-8 sm:px-6 sm:py-10 lg:px-12 lg:py-14">
           {featured ? (
             <Link to={`/product/${featured.id}`} className="group grid gap-6 border border-white/10 bg-black/40 p-4 lg:grid-cols-2 lg:p-6">
-              <div className="aspect-[4/5] overflow-hidden">
+              <div className="aspect-[4/5] max-h-[420px] overflow-hidden sm:max-h-none">
                 <BloomImage src={featured.images[0]} alt={featured.name} className="h-full w-full" imgClassName="object-cover transition duration-700 group-hover:scale-105" />
               </div>
-              <div className="flex flex-col justify-end pb-4">
+              <div className="flex flex-col justify-end pb-2 sm:pb-4">
                 <p className="text-[10px] uppercase tracking-[0.3em] text-gold">Featured</p>
-                <h2 className="mt-3 font-display text-4xl text-paper">{featured.name}</h2>
-                <p className="mt-3 text-sm text-paper/70">{featured.shortDescription}</p>
+                <h2 className="mt-3 font-display text-3xl text-ink sm:text-4xl">{featured.name}</h2>
+                <p className="mt-3 text-sm text-ink/70">{featured.shortDescription}</p>
                 <p className="mt-6 text-lg text-gold">{formatPHP(featured.price)}</p>
               </div>
             </Link>
           ) : null}
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 sm:gap-8 xl:grid-cols-3">
             {rest.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -98,7 +102,7 @@ function BrightPlayfulShop({ catalog }: { catalog: ShopCatalog }) {
     <div className="bg-cream">
       <section className="px-5 pb-8 pt-16 sm:px-8">
         <div className="rounded-[2rem] bg-gradient-to-br from-rose/20 via-paper to-gold/20 px-6 py-12 text-center sm:px-10">
-          <h1 className="font-display text-5xl font-bold leading-none text-ink sm:text-6xl">Shop the joy</h1>
+          <h1 className="font-display text-4xl font-bold leading-none text-ink sm:text-5xl md:text-6xl">Shop the joy</h1>
           <p className="mx-auto mt-4 max-w-md text-sm text-muted">Tap a vibe, find a bloom, send a smile.</p>
           <div className="mt-8 flex flex-wrap justify-center gap-2">
             {catalog.categories.map((item) => (
@@ -188,7 +192,7 @@ function ModernBoldShop({ catalog }: { catalog: ShopCatalog }) {
   return (
     <div className="bg-paper text-ink">
       <section className="border-b-4 border-ink px-4 py-10 sm:px-8">
-        <h1 className="font-display text-[18vw] font-bold uppercase leading-[0.8] tracking-tighter sm:text-[12vw] lg:text-[8rem]">
+        <h1 className="font-display text-[22vw] font-bold uppercase leading-[0.8] tracking-tighter sm:text-[12vw] lg:text-[8rem]">
           Shop
         </h1>
         <div className="mt-6 flex flex-wrap gap-2">
@@ -219,11 +223,11 @@ function ModernBoldShop({ catalog }: { catalog: ShopCatalog }) {
           </div>
           <Empty catalog={catalog} />
         </div>
-        <aside className="border-t-4 border-ink bg-ink px-6 py-8 text-paper lg:border-l-4 lg:border-t-0">
+        <aside className="border-t-4 border-ink bg-ink px-5 py-8 text-paper sm:px-6 lg:border-l-4 lg:border-t-0">
           <FilterControls
             catalog={catalog}
             variant="solid"
-            className="grid gap-5 [&_label]:text-paper/60 [&_input]:border-white/30 [&_input]:text-paper [&_select]:border-white/30 [&_select]:bg-ink [&_select]:text-paper"
+            className="grid gap-5 [&_label]:text-paper/70 [&_input]:border-white/30 [&_input]:bg-transparent [&_input]:text-paper [&_select]:border-white/30 [&_select]:bg-transparent [&_select]:text-paper"
           />
           <div className="mt-6 text-paper/80">
             <PriceMeter catalog={catalog} />
@@ -244,7 +248,7 @@ function RomanticEditorialShop({ catalog }: { catalog: ShopCatalog }) {
       <section className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:py-24">
         <div>
           <p className="text-[11px] uppercase tracking-[0.3em] text-rose">Le Fleur edit</p>
-          <h1 className="mt-4 font-display text-5xl italic leading-[1.05] text-ink sm:text-6xl">
+          <h1 className="mt-4 font-display text-4xl italic leading-[1.05] text-ink sm:text-5xl md:text-6xl">
             Soft stories in bloom
           </h1>
           <div className="mt-8 flex flex-wrap gap-x-5 gap-y-2 text-sm">
@@ -297,24 +301,24 @@ function RomanticEditorialShop({ catalog }: { catalog: ShopCatalog }) {
 /** Gallery wall — image-first masonry, minimal chrome */
 function ArtisticPhotoShop({ catalog }: { catalog: ShopCatalog }) {
   return (
-    <div className="bg-[#11160f] text-paper">
-      <div className="flex flex-col gap-8 px-4 py-10 sm:px-6 lg:flex-row lg:items-start lg:px-8">
+    <div className="bg-[#11160f] text-ink">
+      <div className="flex flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:flex-row lg:items-start lg:px-8">
         <aside className="lg:sticky lg:top-28 lg:w-56 lg:shrink-0">
           <p className="text-[10px] uppercase tracking-[0.4em] text-sage">Gallery</p>
-          <h1 className="mt-3 font-display text-4xl leading-none">FLORA</h1>
-          <p className="mt-3 text-xs text-paper/60">{catalog.filtered.length} works</p>
-          <div className="mt-8">
+          <h1 className="mt-3 font-display text-3xl leading-none sm:text-4xl">FLORA</h1>
+          <p className="mt-3 text-xs text-ink/60">{catalog.filtered.length} works</p>
+          <div className="mt-6 sm:mt-8">
             <FilterControls
               catalog={catalog}
               variant="underline"
-              className="grid gap-4 [&_label]:text-paper/50 [&_input]:border-white/20 [&_input]:text-paper [&_select]:border-white/20 [&_select]:bg-transparent [&_select]:text-paper"
+              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1 [&_label]:text-ink/50 [&_input]:border-white/20 [&_input]:text-ink [&_select]:border-white/20 [&_select]:bg-transparent [&_select]:text-ink"
             />
           </div>
-          <div className="mt-6 text-paper/60">
+          <div className="mt-6 text-ink/60">
             <PriceMeter catalog={catalog} />
           </div>
         </aside>
-        <div className="grid flex-1 grid-cols-2 gap-2 md:grid-cols-3 md:gap-3">
+        <div className="grid min-w-0 flex-1 grid-cols-2 gap-2 md:grid-cols-3 md:gap-3">
           {catalog.filtered.map((product, index) => (
             <Link
               key={product.id}
@@ -327,16 +331,16 @@ function ArtisticPhotoShop({ catalog }: { catalog: ShopCatalog }) {
                 className="h-full w-full"
                 imgClassName="object-cover transition duration-700 group-hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
-              <div className="absolute inset-x-0 bottom-0 translate-y-2 p-3 opacity-0 transition group-hover:translate-y-0 group-hover:opacity-100">
-                <p className="font-display text-lg text-photo-fg">{product.name}</p>
-                <p className="text-xs text-photo-fg/80">{formatPHP(product.price)}</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent md:opacity-0 md:transition md:group-hover:opacity-100" />
+              <div className="absolute inset-x-0 bottom-0 p-2 sm:p-3 md:translate-y-2 md:opacity-0 md:transition md:group-hover:translate-y-0 md:group-hover:opacity-100">
+                <p className="font-display text-sm text-photo-fg sm:text-lg">{product.name}</p>
+                <p className="text-[11px] text-photo-fg/80 sm:text-xs">{formatPHP(product.price)}</p>
               </div>
             </Link>
           ))}
         </div>
       </div>
-      <div className="px-6 pb-16">
+      <div className="px-5 pb-16 sm:px-6">
         <Empty catalog={catalog} />
       </div>
     </div>
@@ -350,7 +354,7 @@ function ScandinavianShop({ catalog }: { catalog: ShopCatalog }) {
       <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
         <div className="max-w-xl border-b border-line pb-10">
           <p className="text-[11px] uppercase tracking-[0.28em] text-sage">Collection</p>
-          <h1 className="mt-3 font-display text-5xl leading-tight">Clear choices</h1>
+          <h1 className="mt-3 font-display text-4xl leading-tight sm:text-5xl">Clear choices</h1>
           <p className="mt-4 text-sm text-muted">Simple filters. Honest prices. Daylight stems.</p>
         </div>
         <div className="mt-12 grid gap-12 lg:grid-cols-[240px_1fr]">
@@ -372,29 +376,29 @@ function ImmersiveShop({ catalog }: { catalog: ShopCatalog }) {
   const spotlight = catalog.filtered.slice(0, 5)
 
   return (
-    <div className="bg-[#070b16] text-paper">
-      <section className="px-6 pb-8 pt-16 lg:px-12">
-        <p className="text-[10px] uppercase tracking-[0.45em] text-accent">NOVA BLOOMS</p>
-        <h1 className="mt-4 font-display text-4xl sm:text-5xl">Discover your bouquet</h1>
-        <div className="mt-8 rounded-sm border border-accent/30 bg-white/5 p-5 backdrop-blur-md sm:p-6">
+    <div className="bg-[#070b16] text-ink">
+      <section className="px-5 pb-8 pt-12 sm:px-6 sm:pt-16 lg:px-12">
+        <p className="text-[10px] uppercase tracking-[0.28em] text-accent sm:tracking-[0.45em]">NOVA BLOOMS</p>
+        <h1 className="mt-4 font-display text-3xl sm:text-4xl md:text-5xl">Discover your bouquet</h1>
+        <div className="mt-8 rounded-sm border border-accent/30 bg-white/5 p-4 backdrop-blur-md sm:p-6">
           <FilterControls
             catalog={catalog}
             variant="solid"
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 [&_label]:text-paper/50 [&_input]:border-accent/30 [&_input]:bg-transparent [&_input]:text-paper [&_select]:border-accent/30 [&_select]:bg-[#0c1224] [&_select]:text-paper"
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 [&_label]:text-ink/50 [&_input]:border-accent/30 [&_input]:bg-transparent [&_input]:text-ink [&_select]:border-accent/30 [&_select]:bg-[#0c1224] [&_select]:text-ink"
           />
-          <div className="mt-5 text-paper/70">
+          <div className="mt-5 text-ink/70">
             <PriceMeter catalog={catalog} />
           </div>
         </div>
       </section>
-      <section className="px-6 pb-6 lg:px-12">
+      <section className="px-5 pb-6 sm:px-6 lg:px-12">
         <p className="text-[10px] uppercase tracking-[0.3em] text-accent/80">Spotlight</p>
-        <div className="mt-4 flex gap-4 overflow-x-auto pb-4">
+        <div className="no-scrollbar mt-4 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4">
           {spotlight.map((product) => (
             <Link
               key={product.id}
               to={`/product/${product.id}`}
-              className="w-64 shrink-0 border border-white/10 bg-white/5 p-3 transition hover:border-accent"
+              className="w-[70vw] max-w-64 shrink-0 snap-start border border-white/10 bg-white/5 p-3 transition hover:border-accent sm:w-64"
             >
               <div className="aspect-square overflow-hidden">
                 <BloomImage src={product.images[0]} alt={product.name} className="h-full w-full" />
@@ -405,7 +409,7 @@ function ImmersiveShop({ catalog }: { catalog: ShopCatalog }) {
           ))}
         </div>
       </section>
-      <section className="px-6 pb-20 lg:px-12">
+      <section className="px-5 pb-16 sm:px-6 sm:pb-20 lg:px-12">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {catalog.filtered.map((product) => (
             <div key={product.id} className="border border-white/10 bg-white/[0.03] p-2">
@@ -423,7 +427,7 @@ function ImmersiveShop({ catalog }: { catalog: ShopCatalog }) {
 function LocalBoutiqueShop({ catalog }: { catalog: ShopCatalog }) {
   return (
     <div className="bg-[#f7f1e8]">
-      <div className="bg-[#2f5d3a] px-5 py-3 text-center text-[12px] text-[#f7f1e8]">
+      <div className="bg-[#2f5d3a] px-4 py-3 text-center text-[11px] leading-snug text-[#f7f1e8] sm:px-5 sm:text-[12px]">
         Metro Manila delivery notes shown at checkout · Prices in PHP
       </div>
       <section className="px-5 py-12 sm:px-8 lg:px-12">
@@ -459,15 +463,15 @@ function LocalBoutiqueShop({ catalog }: { catalog: ShopCatalog }) {
           <Link
             key={product.id}
             to={`/product/${product.id}`}
-            className="flex gap-4 rounded-xl border border-[#e0d4c4] bg-paper p-3 transition hover:border-[#2f5d3a] sm:gap-6 sm:p-4"
+            className="flex gap-3 rounded-xl border border-[#e0d4c4] bg-paper p-3 transition hover:border-[#2f5d3a] sm:gap-6 sm:p-4"
           >
-            <div className="h-28 w-28 shrink-0 overflow-hidden rounded-lg sm:h-32 sm:w-32">
+            <div className="h-24 w-24 shrink-0 overflow-hidden rounded-lg sm:h-32 sm:w-32">
               <BloomImage src={product.images[0]} alt={product.name} className="h-full w-full" />
             </div>
             <div className="flex min-w-0 flex-1 flex-col justify-center">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 className="font-display text-2xl">{product.name}</h2>
-                <p className="text-lg font-semibold text-[#2f5d3a]">{formatPHP(product.price)}</p>
+              <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:justify-between sm:gap-2">
+                <h2 className="font-display text-xl leading-tight sm:text-2xl">{product.name}</h2>
+                <p className="text-base font-semibold text-[#2f5d3a] sm:text-lg">{formatPHP(product.price)}</p>
               </div>
               <p className="mt-1 line-clamp-2 text-sm text-muted">{product.shortDescription}</p>
             </div>

@@ -1,7 +1,11 @@
 import { Link } from 'react-router-dom'
 import { brand } from '../../data/catalog'
+import { useTheme } from '../../themes/ThemeProvider'
+import { themes, type ThemeId } from '../../themes/types'
 
 export function Footer() {
+  const { theme, setTheme } = useTheme()
+
   return (
     <footer className="border-t border-line bg-cream">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:grid-cols-2 lg:grid-cols-4 lg:px-8 lg:py-20">
@@ -22,6 +26,7 @@ export function Footer() {
             <li><Link to="/about" className="hover:text-rose">About</Link></li>
             <li><Link to="/contact" className="hover:text-rose">Contact</Link></li>
             <li><Link to="/account" className="hover:text-rose">Account</Link></li>
+            <li><Link to="/preview-themes" className="hover:text-rose">Design themes</Link></li>
           </ul>
         </div>
 
@@ -46,7 +51,21 @@ export function Footer() {
             <li>Facebook</li>
             <li>Pinterest</li>
           </ul>
-          <p className="mt-6 text-sm leading-relaxed text-muted">{brand.sameDayNote}.</p>
+          <p className="mt-6 text-[11px] uppercase tracking-[0.16em] text-muted">Theme</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {themes.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setTheme(item.id as ThemeId)}
+                className={`border px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] ${
+                  theme === item.id ? 'border-rose text-rose' : 'border-line text-muted hover:text-ink'
+                }`}
+              >
+                {item.id}
+              </button>
+            ))}
+          </div>
           <Link to="/admin" className="mt-6 inline-block text-[11px] uppercase tracking-[0.16em] text-muted/80 hover:text-ink">
             Admin demo
           </Link>

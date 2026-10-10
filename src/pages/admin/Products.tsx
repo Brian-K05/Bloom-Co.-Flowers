@@ -233,7 +233,7 @@ export function AdminProductsPage() {
                   type="button"
                   onClick={() => toggleOccasion(item.slug)}
                   className={`border px-3 py-1 text-xs ${
-                    form.occasions.includes(item.slug) ? 'border-ink bg-ink text-cream' : 'border-line'
+                    form.occasions.includes(item.slug) ? 'border-inverse bg-inverse text-on-inverse' : 'border-line'
                   }`}
                 >
                   {item.label}

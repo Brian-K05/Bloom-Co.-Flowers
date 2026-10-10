@@ -55,9 +55,9 @@ export function OrderTimeline({ order }: { order: Order }) {
             <span
               className={`grid h-8 w-8 place-items-center border ${
                 step.done
-                  ? 'border-sage bg-sage text-cream'
+                  ? 'border-sage bg-sage text-on-accent'
                   : step.current
-                    ? 'border-rose bg-rose text-cream'
+                    ? 'border-rose bg-rose text-on-accent'
                     : 'border-line bg-paper text-muted'
               }`}
             >

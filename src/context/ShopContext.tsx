@@ -24,6 +24,7 @@ const KEYS = {
   products: 'bloomco.v2.products',
   orders: 'bloomco.v2.orders',
   profile: 'bloomco.v2.profile',
+  favorites: 'bloomco.v2.favorites',
 }
 
 type ShopContextValue = {
@@ -31,6 +32,7 @@ type ShopContextValue = {
   cart: CartItem[]
   orders: Order[]
   profile: Profile
+  favorites: string[]
   cartCount: number
   cartSubtotal: number
   cartDetailed: Array<CartItem & { product: Product; lineTotal: number }>
@@ -39,6 +41,7 @@ type ShopContextValue = {
   updateCartMessage: (productId: string, message: string) => void
   removeFromCart: (productId: string) => void
   clearCart: () => void
+  toggleFavorite: (productId: string) => void
   placeOrder: (payload: CheckoutPayload) => Order | null
   getProduct: (id: string) => Product | undefined
   getOrder: (id: string) => Order | undefined
@@ -68,6 +71,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>(() => readStorage(KEYS.cart, []))
   const [orders, setOrders] = useState<Order[]>(() => readStorage(KEYS.orders, seedOrders))
   const [profile, setProfile] = useState<Profile>(() => readStorage(KEYS.profile, defaultProfile))
+  const [favorites, setFavorites] = useState<string[]>(() => readStorage(KEYS.favorites, []))
 
   const persistProducts = useCallback((next: Product[]) => {
     setProductList(next)
@@ -83,6 +87,22 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     setOrders(next)
     writeStorage(KEYS.orders, next)
   }, [])
+
+  const persistFavorites = useCallback((next: string[]) => {
+    setFavorites(next)
+    writeStorage(KEYS.favorites, next)
+  }, [])
+
+  const toggleFavorite = useCallback(
+    (productId: string) => {
+      persistFavorites(
+        favorites.includes(productId)
+          ? favorites.filter((id) => id !== productId)
+          : [...favorites, productId],
+      )
+    },
+    [favorites, persistFavorites],
+  )
 
   const addToCart = useCallback(
     (productId: string, quantity = 1, message?: string) => {
@@ -259,6 +279,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
     setCart([])
     setOrders(seedOrders)
     setProfile(defaultProfile)
+    setFavorites([])
   }, [])
 
   const value = useMemo(
@@ -267,6 +288,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       cart,
       orders,
       profile,
+      favorites,
       cartCount,
       cartSubtotal,
       cartDetailed,
@@ -275,6 +297,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       updateCartMessage,
       removeFromCart,
       clearCart,
+      toggleFavorite,
       placeOrder,
       getProduct,
       getOrder,
@@ -296,6 +319,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       cartSubtotal,
       clearCart,
       deleteProduct,
+      favorites,
       getOrder,
       getProduct,
       orders,
@@ -305,6 +329,7 @@ export function ShopProvider({ children }: { children: ReactNode }) {
       removeFromCart,
       resetDemo,
       toggleAvailability,
+      toggleFavorite,
       updateCartMessage,
       updateCartQuantity,
       updateOrderStatus,

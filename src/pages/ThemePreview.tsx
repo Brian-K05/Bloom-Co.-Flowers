@@ -13,8 +13,8 @@ export function ThemePreviewPage() {
       <p className="text-[11px] uppercase tracking-[0.28em] text-rose">Client preview</p>
       <h1 className="mt-3 font-display text-5xl leading-tight sm:text-6xl">Choose your look</h1>
       <p className="mt-4 max-w-2xl text-muted">
-        Three complete design directions for the same flower-shop ordering system. Pick the feeling that fits your brand —
-        features stay identical.
+        Three complete design directions for the same flower-shop ordering system — different homepage layouts, product cards,
+        typography, and color. Features stay identical; the look does not.
       </p>
 
       <div className="mt-12 grid gap-8 lg:grid-cols-3">

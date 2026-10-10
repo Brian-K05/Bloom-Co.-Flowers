@@ -1,4 +1,7 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { ConceptGalleryPage } from './concepts/ConceptGallery'
+import { ConceptRoutePage } from './concepts/ConceptHome'
+import { ConceptProvider } from './concepts/ConceptProvider'
 import { AdminLayout } from './components/layout/AdminLayout'
 import { Layout } from './components/layout/Layout'
 import { ToastViewport } from './components/ui/ToastViewport'
@@ -17,21 +20,22 @@ import { OrdersPage } from './pages/Orders'
 import { OrderSuccessPage } from './pages/OrderSuccess'
 import { ProductDetailPage } from './pages/ProductDetail'
 import { ShopPage } from './pages/Shop'
-import { ThemePreviewPage } from './pages/ThemePreview'
 import { AdminDashboardPage } from './pages/admin/Dashboard'
 import { AdminOrdersPage } from './pages/admin/Orders'
 import { AdminProductsPage } from './pages/admin/Products'
-import { ThemeProvider } from './themes/ThemeProvider'
 
 export default function App() {
   return (
     <ToastProvider>
-      <ThemeProvider>
+      <ConceptProvider>
         <ShopProvider>
           <BrowserRouter>
             <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/concepts" element={<ConceptGalleryPage />} />
+                <Route path="/concepts/:slug" element={<ConceptRoutePage />} />
+                <Route path="/preview-themes" element={<Navigate to="/concepts" replace />} />
                 <Route path="/shop" element={<ShopPage />} />
                 <Route path="/product/:id" element={<ProductDetailPage />} />
                 <Route path="/occasions" element={<OccasionsPage />} />
@@ -43,7 +47,6 @@ export default function App() {
                 <Route path="/account" element={<AccountPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
-                <Route path="/preview-themes" element={<ThemePreviewPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Route>
               <Route path="/admin" element={<AdminLayout />}>
@@ -56,7 +59,7 @@ export default function App() {
             <ToastViewport />
           </BrowserRouter>
         </ShopProvider>
-      </ThemeProvider>
+      </ConceptProvider>
     </ToastProvider>
   )
 }

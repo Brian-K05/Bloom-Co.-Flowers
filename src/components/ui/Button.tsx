@@ -1,17 +1,17 @@
 import { Link } from 'react-router-dom'
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, MouseEventHandler, ReactNode } from 'react'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'gold' | 'light'
 type Size = 'sm' | 'md' | 'lg'
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-rose text-cream hover:bg-rose-deep border border-rose hover:border-rose-deep',
+    'bg-rose text-on-accent hover:bg-rose-deep border border-rose hover:border-rose-deep',
   secondary:
-    'bg-transparent text-ink border border-ink/25 hover:border-ink hover:bg-ink hover:text-cream',
+    'bg-transparent text-ink border border-ink/30 hover:border-ink hover:bg-inverse hover:text-on-inverse',
   ghost: 'bg-transparent text-ink border-transparent hover:text-rose underline-offset-4 hover:underline',
-  gold: 'bg-transparent text-ink border border-gold hover:bg-gold hover:text-ink',
-  light: 'bg-cream text-ink border border-cream hover:bg-paper',
+  gold: 'bg-transparent text-ink border border-gold hover:bg-gold hover:text-on-accent hover:border-gold',
+  light: 'bg-inverse text-on-inverse border border-inverse hover:opacity-90',
 }
 
 const sizes: Record<Size, string> = {
@@ -38,16 +38,17 @@ export function Button({
   const classes = `inline-flex items-center justify-center text-center leading-none uppercase transition-colors duration-200 disabled:opacity-50 disabled:pointer-events-none ${variants[variant]} ${sizes[size]} ${className}`
 
   if (href) {
+    const handleClick = props.onClick as unknown as MouseEventHandler<HTMLAnchorElement> | undefined
     const isHash = href.startsWith('#')
     if (isHash) {
       return (
-        <a href={href} className={classes}>
+        <a href={href} className={classes} onClick={handleClick}>
           {children}
         </a>
       )
     }
     return (
-      <Link to={href} className={classes}>
+      <Link to={href} className={classes} onClick={handleClick}>
         {children}
       </Link>
     )

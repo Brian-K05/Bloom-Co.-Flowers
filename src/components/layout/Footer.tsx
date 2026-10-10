@@ -1,20 +1,20 @@
 import { Link } from 'react-router-dom'
+import { useConcept } from '../../concepts/ConceptProvider'
+import { concepts, type ConceptId } from '../../concepts/registry'
 import { brand } from '../../data/catalog'
-import { useTheme } from '../../themes/ThemeProvider'
-import { themes, type ThemeId } from '../../themes/types'
 
 export function Footer() {
-  const { theme, setTheme } = useTheme()
+  const { concept, conceptId, setConcept } = useConcept()
 
   return (
     <footer className="border-t border-line bg-cream">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:grid-cols-2 lg:grid-cols-4 lg:px-8 lg:py-20">
         <div>
-          <p className="font-display text-3xl tracking-[0.06em]">Bloom & Co.</p>
-          <p className="mt-3 max-w-xs text-sm italic leading-relaxed text-muted">{brand.tagline}</p>
+          <p className="font-display text-3xl tracking-[0.06em]">{concept.brand}</p>
+          <p className="mt-3 max-w-xs text-sm italic leading-relaxed text-muted">{concept.tagline}</p>
           <div className="mt-6 h-px w-10 bg-gold" />
           <p className="mt-6 text-sm leading-relaxed text-muted">
-            A boutique floral studio arranging blooms for birthdays, anniversaries, and the quieter days in between.
+            {concept.description}
           </p>
         </div>
 
@@ -26,7 +26,7 @@ export function Footer() {
             <li><Link to="/about" className="hover:text-rose">About</Link></li>
             <li><Link to="/contact" className="hover:text-rose">Contact</Link></li>
             <li><Link to="/account" className="hover:text-rose">Account</Link></li>
-            <li><Link to="/preview-themes" className="hover:text-rose">Design themes</Link></li>
+            <li><Link to="/concepts" className="hover:text-rose">Design concepts</Link></li>
           </ul>
         </div>
 
@@ -45,28 +45,30 @@ export function Footer() {
         </div>
 
         <div>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-rose">Studio</p>
-          <ul className="mt-4 space-y-2.5 text-sm text-muted">
-            <li>Instagram</li>
-            <li>Facebook</li>
-            <li>Pinterest</li>
-          </ul>
-          <p className="mt-6 text-[11px] uppercase tracking-[0.16em] text-muted">Theme</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {themes.map((item) => (
-              <button
+          <p className="text-[11px] uppercase tracking-[0.22em] text-rose">Concept</p>
+          <p className="mt-4 text-sm text-muted">
+            {concept.number} · {concept.name}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {concepts.map((item) => (
+              <Link
                 key={item.id}
-                type="button"
-                onClick={() => setTheme(item.id as ThemeId)}
-                className={`border px-2.5 py-1 text-[11px] uppercase tracking-[0.12em] ${
-                  theme === item.id ? 'border-rose text-rose' : 'border-line text-muted hover:text-ink'
+                to={item.route}
+                onClick={() => setConcept(item.id as ConceptId)}
+                title={item.name}
+                aria-current={conceptId === item.id ? 'page' : undefined}
+                className={`border px-2 py-1 text-[10px] uppercase tracking-[0.1em] ${
+                  conceptId === item.id ? 'border-rose text-rose' : 'border-line text-muted hover:text-ink'
                 }`}
               >
-                {item.id}
-              </button>
+                {item.number}
+              </Link>
             ))}
           </div>
-          <Link to="/admin" className="mt-6 inline-block text-[11px] uppercase tracking-[0.16em] text-muted/80 hover:text-ink">
+          <Link to="/concepts" className="mt-4 inline-block text-[11px] uppercase tracking-[0.16em] text-muted hover:text-ink">
+            Open gallery
+          </Link>
+          <Link to="/admin" className="mt-3 block text-[11px] uppercase tracking-[0.16em] text-muted/80 hover:text-ink">
             Admin demo
           </Link>
         </div>

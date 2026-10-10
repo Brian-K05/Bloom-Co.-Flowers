@@ -18,69 +18,17 @@
   --color-blush: #f3e7e4;
   --color-image-wash: #eee6da;
   --color-selection: #ead8d4;
+  --color-accent: #7a3e48;
+  --color-on-accent: #fffaf6;
+  --color-photo-fg: #fffaf6;
+  --color-inverse: #2a2724;
+  --color-on-inverse: #fffaf6;
 }
+
+@import "./concepts/tokens.css";
 
 html {
   scroll-behavior: smooth;
-}
-
-/* Theme packs — data-theme on <html> */
-:root,
-html[data-theme='atelier'] {
-  --color-ivory: #f6f1e8;
-  --color-cream: #fbf8f3;
-  --color-paper: #fffcf8;
-  --color-ink: #2a2724;
-  --color-muted: #6b645c;
-  --color-rose: #7a3e48;
-  --color-rose-deep: #5c2e38;
-  --color-sage: #5a6b5a;
-  --color-gold: #c4a574;
-  --color-gold-soft: #d4c0a1;
-  --color-line: #e4dcd0;
-  --color-blush: #f3e7e4;
-  --color-image-wash: #eee6da;
-  --color-selection: #ead8d4;
-  --font-display: "Cormorant Garamond", "Times New Roman", serif;
-  --font-sans: "Outfit", "Segoe UI", sans-serif;
-}
-
-html[data-theme='garden'] {
-  --color-ivory: #f7faf6;
-  --color-cream: #ffffff;
-  --color-paper: #ffffff;
-  --color-ink: #1f2a24;
-  --color-muted: #5f6f66;
-  --color-rose: #c4787a;
-  --color-rose-deep: #a45d60;
-  --color-sage: #3f6b55;
-  --color-gold: #b7a078;
-  --color-gold-soft: #d2c4a6;
-  --color-line: #d7e3da;
-  --color-blush: #f3e9ea;
-  --color-image-wash: #e4ebe3;
-  --color-selection: #d8e8dc;
-  --font-display: "Fraunces", "Times New Roman", serif;
-  --font-sans: "DM Sans", "Segoe UI", sans-serif;
-}
-
-html[data-theme='noir'] {
-  --color-ivory: #141211;
-  --color-cream: #1c1917;
-  --color-paper: #221e1c;
-  --color-ink: #f4efe8;
-  --color-muted: #b0a69c;
-  --color-rose: #b56a72;
-  --color-rose-deep: #9a5159;
-  --color-sage: #7d8f7c;
-  --color-gold: #c9b28a;
-  --color-gold-soft: #d8c7a8;
-  --color-line: #3a342f;
-  --color-blush: #2a2224;
-  --color-image-wash: #2a2420;
-  --color-selection: #4a3034;
-  --font-display: "Playfair Display", "Times New Roman", serif;
-  --font-sans: "Manrope", "Segoe UI", sans-serif;
 }
 
 body {

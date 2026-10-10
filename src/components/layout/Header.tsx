@@ -2,6 +2,7 @@ import { Search, ShoppingBag, User, X } from 'lucide-react'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
+import { useConcept } from '../../concepts/ConceptProvider'
 import { useShop } from '../../context/ShopContext'
 import { formatPHP } from '../../lib/format'
 
@@ -11,9 +12,11 @@ const links = [
   { to: '/occasions', label: 'Occasions' },
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
+  { to: '/concepts', label: 'Concepts' },
 ]
 
 export function Header() {
+  const { concept } = useConcept()
   const { cartCount, products } = useShop()
   const [open, setOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -59,14 +62,14 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-line/80 bg-ivory/92 backdrop-blur-md">
+      <header className="sticky top-0 z-50 border-b border-line/80 bg-ivory/95 text-ink backdrop-blur-md">
         <p className="hidden border-b border-line/60 px-4 py-2 text-center text-[11px] tracking-[0.12em] text-muted sm:block">
           Same-day delivery for selected Metro Manila areas
         </p>
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 lg:px-8">
           <button
             type="button"
-            className="flex flex-col gap-1.5 lg:hidden"
+            className="flex flex-col gap-1.5 text-ink lg:hidden"
             aria-label="Open menu"
             aria-expanded={open}
             onClick={() => setOpen(true)}
@@ -75,12 +78,12 @@ export function Header() {
             <span className="block h-px w-4 bg-ink" />
           </button>
 
-          <Link to="/" className="text-center">
-            <span className="block font-display text-[28px] leading-none tracking-[0.12em] sm:text-[32px]">
-              Bloom & Co.
+          <Link to="/" className="text-center text-ink">
+            <span className="block font-display text-[22px] leading-none tracking-[0.08em] text-ink sm:text-[28px]">
+              {concept.brand}
             </span>
-            <span className="mt-1 hidden text-[10px] uppercase tracking-[0.32em] text-muted sm:block">
-              Flowers for Every Moment
+            <span className="mt-1 hidden max-w-[220px] truncate text-[10px] uppercase tracking-[0.22em] text-muted sm:block">
+              {concept.tagline}
             </span>
           </Link>
 
@@ -99,17 +102,17 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3 sm:gap-4">
-            <button type="button" aria-label="Search" onClick={() => setSearchOpen(true)}>
+          <div className="flex items-center gap-3 text-ink sm:gap-4">
+            <button type="button" aria-label="Search" onClick={() => setSearchOpen(true)} className="text-ink">
               <Search size={18} />
             </button>
-            <Link to="/account" aria-label="Account">
+            <Link to="/account" aria-label="Account" className="text-ink">
               <User size={18} />
             </Link>
-            <Link to="/cart" aria-label="Cart" className="relative">
+            <Link to="/cart" aria-label="Cart" className="relative text-ink">
               <ShoppingBag size={18} />
               {cartCount > 0 ? (
-                <span className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center bg-rose px-1 text-[10px] text-cream">
+                <span className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center bg-rose px-1 text-[10px] text-on-accent">
                   {cartCount}
                 </span>
               ) : null}
@@ -127,7 +130,7 @@ export function Header() {
               aria-label="Menu"
             >
               <div className="flex items-center justify-between border-b border-line bg-ivory px-5 py-4">
-                <span className="font-display text-2xl tracking-[0.12em]">Bloom & Co.</span>
+                <span className="font-display text-2xl tracking-[0.08em]">{concept.brand}</span>
                 <button type="button" aria-label="Close menu" onClick={() => setOpen(false)}>
                   <X />
                 </button>

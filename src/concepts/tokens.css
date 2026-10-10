@@ -1,0 +1,405 @@
+/* 10 concept design systems — applied via html[data-concept]
+   Surfaces: ivory / cream / paper (page plates)
+   Text: ink / muted (always readable on those plates)
+   on-accent: text on solid rose/gold/sage buttons (always light)
+   photo-fg: text over photography (always light)
+   inverse / on-inverse: high-contrast CTA plate + its text
+*/
+
+:root,
+html[data-concept='elegant-minimal'] {
+  --color-ivory: #f7f4ef;
+  --color-cream: #fffcf8;
+  --color-paper: #ffffff;
+  --color-ink: #1f2a24;
+  --color-muted: #5c6560;
+  --color-rose: #8a5a5a;
+  --color-rose-deep: #6e4545;
+  --color-sage: #2f4f3e;
+  --color-gold: #b8a07a;
+  --color-gold-soft: #d2c4a8;
+  --color-line: #e5e0d8;
+  --color-blush: #f3ebe6;
+  --color-image-wash: #ebe6df;
+  --color-selection: #e4d8d0;
+  --color-accent: #2f4f3e;
+  --color-on-accent: #fffaf6;
+  --color-photo-fg: #fffaf6;
+  --color-inverse: #1f2a24;
+  --color-on-inverse: #fffaf6;
+  /* 01 Elegant Minimal — refined serif + clean sans */
+  --font-display: "Cormorant Garamond", "Times New Roman", serif;
+  --font-sans: "Outfit", "Segoe UI", sans-serif;
+  --radius-card: 0px;
+  --shadow-card: 0 12px 40px rgba(31, 42, 36, 0.06);
+  color-scheme: light;
+}
+
+html[data-concept='dark-luxury'] {
+  --color-ivory: #0c0b0a;
+  --color-cream: #141211;
+  --color-paper: #1a1715;
+  --color-ink: #fff8f0;
+  --color-muted: #d4c8ba;
+  --color-rose: #c45a5a;
+  --color-rose-deep: #a34444;
+  --color-sage: #7d8f7a;
+  --color-gold: #d4b483;
+  --color-gold-soft: #e4cba0;
+  --color-line: #3a342f;
+  --color-blush: #241c1c;
+  --color-image-wash: #1c1816;
+  --color-selection: #3d2a22;
+  --color-accent: #d4b483;
+  --color-on-accent: #fffaf6;
+  --color-photo-fg: #fffaf6;
+  --color-inverse: #f5efe7;
+  --color-on-inverse: #0c0b0a;
+  /* 02 Dark Luxury — cinematic editorial serif */
+  --font-display: "Playfair Display", "Times New Roman", serif;
+  --font-sans: "Manrope", "Segoe UI", sans-serif;
+  --radius-card: 0px;
+  --shadow-card: none;
+  color-scheme: dark;
+}
+
+html[data-concept='bright-playful'] {
+  --color-ivory: #fff8f5;
+  --color-cream: #ffffff;
+  --color-paper: #ffffff;
+  --color-ink: #2a1f28;
+  --color-muted: #6b5560;
+  --color-rose: #f06a8a;
+  --color-rose-deep: #e04d72;
+  --color-sage: #5db88a;
+  --color-gold: #f0c95a;
+  --color-gold-soft: #ffe08a;
+  --color-line: #f3d7df;
+  --color-blush: #ffe4ec;
+  --color-image-wash: #ffe8ef;
+  --color-selection: #ffd0dc;
+  --color-accent: #f06a8a;
+  --color-on-accent: #ffffff;
+  --color-photo-fg: #ffffff;
+  --color-inverse: #2a1f28;
+  --color-on-inverse: #ffffff;
+  /* 03 Bright & Playful — rounded friendly faces */
+  --font-display: "Nunito", "Segoe UI", sans-serif;
+  --font-sans: "Quicksand", "Segoe UI", sans-serif;
+  --radius-card: 22px;
+  --shadow-card: 0 10px 28px rgba(240, 106, 138, 0.12);
+  color-scheme: light;
+}
+
+html[data-concept='rustic-warm'] {
+  --color-ivory: #f3ebe0;
+  --color-cream: #faf4eb;
+  --color-paper: #fff9f1;
+  --color-ink: #3a2f26;
+  --color-muted: #6f5f4e;
+  --color-rose: #b56b4a;
+  --color-rose-deep: #94553a;
+  --color-sage: #6b7348;
+  --color-gold: #c49a6c;
+  --color-gold-soft: #dfc19a;
+  --color-line: #e2d4c2;
+  --color-blush: #efe0d0;
+  --color-image-wash: #e8dccb;
+  --color-selection: #e5d0b8;
+  --color-accent: #6b7348;
+  --color-on-accent: #fffaf6;
+  --color-photo-fg: #fffaf6;
+  --color-inverse: #3a2f26;
+  --color-on-inverse: #fffaf6;
+  /* 04 Rustic & Warm — traditional bookish serif */
+  --font-display: "Libre Baskerville", "Times New Roman", serif;
+  --font-sans: "Source Sans 3", "Segoe UI", sans-serif;
+  --radius-card: 4px;
+  --shadow-card: 0 2px 0 rgba(58, 47, 38, 0.08);
+  color-scheme: light;
+}
+
+html[data-concept='modern-bold'] {
+  --color-ivory: #0a0a0a;
+  --color-cream: #111111;
+  --color-paper: #161616;
+  --color-ink: #fafafa;
+  --color-muted: #c4c4c4;
+  --color-rose: #ff2d7a;
+  --color-rose-deep: #e01862;
+  --color-sage: #ffffff;
+  --color-gold: #ff2d7a;
+  --color-gold-soft: #ff7aad;
+  --color-line: #333333;
+  --color-blush: #1a0f14;
+  --color-image-wash: #1a1a1a;
+  --color-selection: #4a1530;
+  --color-accent: #ff2d7a;
+  --color-on-accent: #ffffff;
+  --color-photo-fg: #ffffff;
+  --color-inverse: #ffffff;
+  --color-on-inverse: #0a0a0a;
+  /* 05 Modern Bold — oversized geometric display */
+  --font-display: "Syne", "Arial Black", sans-serif;
+  --font-sans: "Space Grotesk", "Segoe UI", sans-serif;
+  --radius-card: 0px;
+  --shadow-card: none;
+  color-scheme: dark;
+}
+
+html[data-concept='romantic-editorial'] {
+  --color-ivory: #faf3ef;
+  --color-cream: #fff8f5;
+  --color-paper: #fffbf9;
+  --color-ink: #3d2c30;
+  --color-muted: #7a6369;
+  --color-rose: #c47888;
+  --color-rose-deep: #a85d6e;
+  --color-sage: #8b7a72;
+  --color-gold: #d4a5a5;
+  --color-gold-soft: #e8c4c4;
+  --color-line: #ead9d6;
+  --color-blush: #f5e0e0;
+  --color-image-wash: #f0e4e0;
+  --color-selection: #efd0d4;
+  --color-accent: #c47888;
+  --color-on-accent: #fffaf6;
+  --color-photo-fg: #fffaf6;
+  --color-inverse: #3d2c30;
+  --color-on-inverse: #fffaf6;
+  /* 06 Romantic Editorial — high-contrast fashion serif + soft sans */
+  --font-display: "Bodoni Moda", "Times New Roman", serif;
+  --font-sans: "Karla", "Segoe UI", sans-serif;
+  --radius-card: 18px;
+  --shadow-card: 0 16px 40px rgba(61, 44, 48, 0.06);
+  color-scheme: light;
+}
+
+html[data-concept='artistic-photographic'] {
+  --color-ivory: #101412;
+  --color-cream: #161b18;
+  --color-paper: #1c221e;
+  --color-ink: #f4f2ec;
+  --color-muted: #b8c0b8;
+  --color-rose: #d4b08a;
+  --color-rose-deep: #b89268;
+  --color-sage: #5a7d68;
+  --color-gold: #d4b08a;
+  --color-gold-soft: #e4c8a8;
+  --color-line: #354038;
+  --color-blush: #1e2420;
+  --color-image-wash: #1a1f1c;
+  --color-selection: #2f3d32;
+  --color-accent: #d4b08a;
+  --color-on-accent: #101412;
+  --color-photo-fg: #fffaf6;
+  --color-inverse: #f4f2ec;
+  --color-on-inverse: #101412;
+  /* 07 Artistic & Photographic — literary gallery serif */
+  --font-display: "Newsreader", "Times New Roman", serif;
+  --font-sans: "Figtree", "Segoe UI", sans-serif;
+  --radius-card: 0px;
+  --shadow-card: none;
+  color-scheme: dark;
+}
+
+html[data-concept='scandinavian-nature'] {
+  --color-ivory: #f5f6f3;
+  --color-cream: #ffffff;
+  --color-paper: #ffffff;
+  --color-ink: #2a322c;
+  --color-muted: #5f6962;
+  --color-rose: #6f7f6d;
+  --color-rose-deep: #5a6a58;
+  --color-sage: #5a7a62;
+  --color-gold: #a8a090;
+  --color-gold-soft: #c8c0b0;
+  --color-line: #dde3dd;
+  --color-blush: #eef1ec;
+  --color-image-wash: #e8ece6;
+  --color-selection: #d8e4d8;
+  --color-accent: #5a7a62;
+  --color-on-accent: #ffffff;
+  --color-photo-fg: #ffffff;
+  --color-inverse: #2a322c;
+  --color-on-inverse: #ffffff;
+  /* 08 Scandinavian Nature — restrained serif + geometric sans */
+  --font-display: "Source Serif 4", "Times New Roman", serif;
+  --font-sans: "Sora", "Segoe UI", sans-serif;
+  --radius-card: 2px;
+  --shadow-card: none;
+  color-scheme: light;
+}
+
+html[data-concept='interactive-immersive'] {
+  --color-ivory: #070b16;
+  --color-cream: #0c1224;
+  --color-paper: #121a30;
+  --color-ink: #eef2ff;
+  --color-muted: #b4bfd9;
+  --color-rose: #a78bfa;
+  --color-rose-deep: #8b5cf6;
+  --color-sage: #22d3ee;
+  --color-gold: #67e8f9;
+  --color-gold-soft: #a5f3fc;
+  --color-line: #2c3a66;
+  --color-blush: #1a1540;
+  --color-image-wash: #151d35;
+  --color-selection: #2a1f55;
+  --color-accent: #22d3ee;
+  --color-on-accent: #070b16;
+  --color-photo-fg: #eef2ff;
+  --color-inverse: #eef2ff;
+  --color-on-inverse: #070b16;
+  /* 09 Interactive & Immersive — tech display + compact UI sans */
+  --font-display: "Exo 2", "Segoe UI", sans-serif;
+  --font-sans: "Manrope", "Segoe UI", sans-serif;
+  --radius-card: 16px;
+  --shadow-card: 0 0 40px rgba(34, 211, 238, 0.08);
+  color-scheme: dark;
+}
+
+html[data-concept='local-boutique'] {
+  --color-ivory: #f8f1e6;
+  --color-cream: #fff8ee;
+  --color-paper: #fffdf8;
+  --color-ink: #2f2a22;
+  --color-muted: #655a4c;
+  --color-rose: #d97757;
+  --color-rose-deep: #c45f3f;
+  --color-sage: #3f7a4e;
+  --color-gold: #e8b84a;
+  --color-gold-soft: #f2d07a;
+  --color-line: #e6d8c4;
+  --color-blush: #f5e4d0;
+  --color-image-wash: #ebe0d0;
+  --color-selection: #f0d8b8;
+  --color-accent: #3f7a4e;
+  --color-on-accent: #fffaf6;
+  --color-photo-fg: #fffaf6;
+  --color-inverse: #2f2a22;
+  --color-on-inverse: #fffaf6;
+  /* 10 Filipino Local Boutique — warm slab + friendly sans */
+  /* 10 Filipino Local Boutique — warm slab + friendly sans */
+  --font-display: "Zilla Slab", "Georgia", serif;
+  --font-sans: "Nunito Sans", "Segoe UI", sans-serif;
+  --radius-card: 12px;
+  --shadow-card: 0 8px 24px rgba(47, 42, 34, 0.06);
+  color-scheme: light;
+}
+
+/* Motion primitives */
+.reveal {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 480ms ease, transform 480ms ease;
+}
+
+.reveal--in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+/* Custom cursor */
+.has-custom-cursor,
+.has-custom-cursor * {
+  cursor: none !important;
+}
+
+.concept-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+
+.concept-cursor__dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-accent, var(--color-rose));
+  transform: translate(-50%, -50%);
+}
+
+.concept-cursor__ring {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--color-accent, var(--color-rose)) 55%, transparent);
+  transform: translate(-50%, -50%);
+  transition: width 160ms ease, height 160ms ease, opacity 160ms ease;
+}
+
+.concept-cursor.is-hover .concept-cursor__ring {
+  width: 48px;
+  height: 48px;
+}
+
+.concept-cursor__label {
+  position: absolute;
+  top: 28px;
+  left: 10px;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-on-inverse);
+  background: var(--color-inverse);
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.concept-cursor--gold-glow .concept-cursor__dot {
+  background: var(--color-gold);
+  box-shadow: 0 0 18px rgba(196, 165, 116, 0.55);
+}
+
+.concept-cursor--neon .concept-cursor__dot {
+  background: var(--color-sage);
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.65);
+}
+
+.concept-cursor--playful .concept-cursor__dot {
+  background: var(--color-rose);
+  width: 8px;
+  height: 8px;
+}
+
+.concept-cursor--contrast .concept-cursor__dot {
+  background: #ff2d7a;
+}
+
+@media (pointer: coarse) {
+  .has-custom-cursor,
+  .has-custom-cursor * {
+    cursor: auto !important;
+  }
+  .concept-cursor {
+    display: none;
+  }
+}
+
+/* Form fields stay readable on dark concepts */
+input,
+textarea,
+select {
+  color: var(--color-ink);
+  background-color: var(--color-paper);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in oklab, var(--color-muted) 85%, transparent);
+}

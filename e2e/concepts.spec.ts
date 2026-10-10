@@ -62,14 +62,17 @@ test.describe('concept gallery and routes', () => {
 
 test.describe('shopping flows', () => {
   test('shop page lists products', async ({ page }) => {
+    await page.goto('/concepts/01-elegant-minimal')
     await page.goto('/shop')
-    await expect(page.getByRole('heading', { name: /find something beautiful/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /quiet blooms/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /add to cart/i }).first()).toBeVisible()
   })
 
   test('add to cart updates cart count and totals', async ({ page }) => {
+    await page.goto('/concepts/01-elegant-minimal')
     await page.goto('/shop')
     await page.evaluate(() => localStorage.clear())
+    await page.evaluate(() => localStorage.setItem('bloomco.concept', 'elegant-minimal'))
     await page.reload()
 
     await page.getByRole('button', { name: /add to cart/i }).first().click()
@@ -81,7 +84,10 @@ test.describe('shopping flows', () => {
 
   test('checkout form validation requires fields', async ({ page }) => {
     await page.goto('/shop')
-    await page.evaluate(() => localStorage.clear())
+    await page.evaluate(() => {
+      localStorage.clear()
+      localStorage.setItem('bloomco.concept', 'elegant-minimal')
+    })
     await page.reload()
     await page.getByRole('button', { name: /add to cart/i }).first().click()
     await expect(page.getByText(/added to your cart/i)).toBeVisible({ timeout: 8000 })
@@ -101,9 +107,23 @@ test.describe('shopping flows', () => {
   })
 
   test('category filter updates shop', async ({ page }) => {
+    await page.goto('/concepts/01-elegant-minimal')
     await page.goto('/shop')
     const category = page.locator('select').filter({ has: page.locator('option', { hasText: 'Roses' }) }).first()
     await category.selectOption('roses')
     await expect(page).toHaveURL(/category=roses/)
+  })
+
+  test('shop layout changes across concepts', async ({ page }) => {
+    await page.goto('/concepts/05-modern-bold')
+    await expect(page.getByRole('heading', { name: /bloom\s*hard/i })).toBeVisible()
+    await page.getByRole('link', { name: 'Shop', exact: true }).first().click()
+    await expect(page).toHaveURL(/\/shop/)
+    await expect(page.getByRole('heading', { name: /shop/i }).first()).toBeVisible()
+
+    await page.goto('/concepts/10-local-boutique')
+    await expect(page.getByRole('link', { name: /Sariwa Blooms/i }).first()).toBeVisible()
+    await page.getByRole('link', { name: 'Shop', exact: true }).first().click()
+    await expect(page.getByRole('heading', { name: /fresh from our studio/i })).toBeVisible()
   })
 })

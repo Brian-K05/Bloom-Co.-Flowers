@@ -3,17 +3,26 @@ import { useConcept } from '../../concepts/ConceptProvider'
 import { concepts, type ConceptId } from '../../concepts/registry'
 import { brand } from '../../data/catalog'
 
+const darkConcepts: ConceptId[] = ['dark-luxury', 'artistic-photographic', 'interactive-immersive']
+
 export function Footer() {
   const { concept, conceptId, setConcept } = useConcept()
+  const dark = darkConcepts.includes(conceptId)
 
   return (
-    <footer className="border-t border-line bg-cream">
+    <footer
+      className={`border-t ${
+        dark ? 'border-white/10 bg-black text-paper' : 'border-line bg-cream text-ink'
+      }`}
+    >
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-16 md:grid-cols-2 lg:grid-cols-4 lg:px-8 lg:py-20">
         <div>
           <p className="font-display text-3xl tracking-[0.06em]">{concept.brand}</p>
-          <p className="mt-3 max-w-xs text-sm italic leading-relaxed text-muted">{concept.tagline}</p>
+          <p className={`mt-3 max-w-xs text-sm italic leading-relaxed ${dark ? 'text-paper/65' : 'text-muted'}`}>
+            {concept.tagline}
+          </p>
           <div className="mt-6 h-px w-10 bg-gold" />
-          <p className="mt-6 text-sm leading-relaxed text-muted">
+          <p className={`mt-6 text-sm leading-relaxed ${dark ? 'text-paper/65' : 'text-muted'}`}>
             {concept.description}
           </p>
         </div>

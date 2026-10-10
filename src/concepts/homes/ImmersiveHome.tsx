@@ -98,41 +98,33 @@ export function ImmersiveHome() {
         </div>
       </section>
 
-      {/* Layered recommendation cards */}
+      {/* Mood recommendations */}
       <section className="px-6 py-16 sm:px-10 lg:px-16 lg:py-24">
         <Reveal>
           <h2 className="font-display text-2xl text-ink sm:text-3xl">Recommended for you</h2>
           <p className="mt-2 text-sm text-muted">Mood: {activeMood.label}</p>
         </Reveal>
-        <div className="relative mt-12 min-h-[280px]">
+        <ul className="mt-10 space-y-4">
           {fallbackGrid.slice(0, 3).map((product, i) => (
-            <Reveal key={product.id} delayMs={i * 100}>
-              <div
-                className="relative mb-6 w-full max-w-md transition-transform sm:mb-0 sm:absolute sm:w-[85%]"
-                style={{
-                  top: i * 24,
-                  left: i * 32,
-                  zIndex: 10 - i,
-                }}
-              >
-                <div className="rounded-sm border border-line bg-paper p-4 shadow-card">
-                  <div className="flex gap-4">
-                    <div className="h-24 w-24 shrink-0 overflow-hidden">
-                      <BloomImage src={product.images[0]} alt={product.name} className="h-full w-full" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <Link to={`/product/${product.id}`} className="font-display text-lg text-ink hover:text-accent">
-                        {product.name}
-                      </Link>
-                      <p className="mt-1 line-clamp-2 text-xs text-muted">{product.shortDescription}</p>
-                    </div>
+            <Reveal key={product.id} delayMs={i * 80}>
+              <li>
+                <Link
+                  to={`/product/${product.id}`}
+                  className="group flex gap-4 rounded-sm border border-line bg-paper p-4 shadow-[0_0_24px_rgba(34,211,238,0.08)] transition hover:border-accent"
+                >
+                  <div className="h-24 w-24 shrink-0 overflow-hidden">
+                    <BloomImage src={product.images[0]} alt={product.name} className="h-full w-full" />
                   </div>
-                </div>
-              </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display text-lg text-ink group-hover:text-accent">{product.name}</p>
+                    <p className="mt-1 line-clamp-2 text-xs text-muted">{product.shortDescription}</p>
+                  </div>
+                </Link>
+              </li>
             </Reveal>
           ))}
-        </div>
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:mt-32">
+        </ul>
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {fallbackGrid.map((product, i) => (
             <Reveal key={`grid-${product.id}`} delayMs={i * 50}>
               <div className="border border-line bg-paper p-2">

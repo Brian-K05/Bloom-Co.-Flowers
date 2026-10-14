@@ -6,6 +6,7 @@ import {
   Menu,
   Package,
   Palette,
+  Plus,
   PlusCircle,
   Truck,
   X,
@@ -14,21 +15,21 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, Navigate, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { todayISODate } from '../lib/format'
 import { usePosAuth } from './auth/PosAuthContext'
+import { statusLabel } from './components/StatusBadge'
 import { usePosTheme } from './PosThemeProvider'
 import { usePos } from './store/PosContext'
 import { posThemes } from './themes/registry'
 import type { PosOrderStatus, PosThemeId } from './types'
-import { statusLabel } from './components/StatusBadge'
 
 const links = [
-  { to: '/admin', label: 'Dashboard', short: 'Dash', icon: LayoutDashboard, end: true },
-  { to: '/admin/orders/new', label: 'New Order', short: 'New', icon: PlusCircle },
-  { to: '/admin/orders', label: 'Orders', short: 'Orders', icon: ClipboardList },
-  { to: '/admin/calendar', label: 'Calendar', short: 'Cal', icon: CalendarDays },
-  { to: '/admin/inventory', label: 'Inventory', short: 'Stock', icon: Package },
-  { to: '/admin/preorders', label: 'Pre-orders', short: 'Pre', icon: Truck },
-  { to: '/admin/reference', label: 'Reference', short: 'Ref', icon: BookOpen },
-  { to: '/admin/concepts', label: 'Concepts', short: 'UI', icon: Palette },
+  { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/admin/orders/new', label: 'New Order', icon: PlusCircle, primary: true },
+  { to: '/admin/orders', label: 'Orders', icon: ClipboardList },
+  { to: '/admin/calendar', label: 'Calendar', icon: CalendarDays },
+  { to: '/admin/inventory', label: 'Inventory', icon: Package },
+  { to: '/admin/preorders', label: 'Pre-Orders', icon: Truck },
+  { to: '/admin/reference', label: 'Flower Reference', icon: BookOpen },
+  { to: '/admin/concepts', label: 'Concepts', icon: Palette },
 ]
 
 const peakStatuses: PosOrderStatus[] = ['pending', 'confirmed', 'preparing', 'ready_out']
@@ -40,6 +41,8 @@ export function PosShell() {
   const location = useLocation()
   const [open, setOpen] = useState(false)
   const today = todayISODate()
+  const onNewOrder = location.pathname.startsWith('/admin/orders/new')
+  const lightRail = themeId === 'counter-clear' || themeId === 'bloom-ledger' || themeId === 'studio-grid'
 
   useEffect(() => {
     setOpen(false)
@@ -76,6 +79,7 @@ export function PosShell() {
   const isSoft = themeId === 'bloom-ledger'
   const isRail = theme.layout === 'rail'
   const isSplit = theme.layout === 'split'
+  const divider = lightRail ? 'border-[var(--pos-line)]' : 'border-white/10'
 
   const nav = (
     <nav className={`flex flex-col gap-1 p-3 ${isSoft ? 'gap-2 p-4' : ''}`}>
@@ -86,13 +90,19 @@ export function PosShell() {
             key={link.to}
             to={link.to}
             end={link.end}
-            className={({ isActive }) =>
-              `flex items-center gap-3 rounded-[var(--pos-radius)] px-3 transition ${
-                isSoft ? 'min-h-12 py-3 text-[13px]' : 'py-2.5 text-[12px]'
-              } font-semibold uppercase tracking-[0.12em] ${
-                isActive ? 'bg-[var(--pos-accent)] text-white' : 'opacity-85 hover:opacity-100'
-              } ${isRail ? 'lg:justify-center lg:px-2 xl:justify-start xl:px-3' : ''}`
-            }
+            className={({ isActive }) => {
+              const active = isActive
+              return [
+                'flex items-center gap-3 rounded-[var(--pos-radius)] px-3 font-semibold transition',
+                isSoft ? 'min-h-12 py-3 text-[13px]' : 'min-h-10 py-2.5 text-[12px]',
+                isRail ? 'lg:justify-center lg:px-2 xl:justify-start xl:px-3' : '',
+                active
+                  ? 'bg-[var(--pos-accent)] text-[var(--pos-accent-ink)]'
+                  : link.primary
+                    ? 'text-[var(--pos-accent)] hover:bg-[var(--pos-accent-soft)]'
+                    : 'opacity-80 hover:opacity-100',
+              ].join(' ')
+            }}
             title={link.label}
           >
             <Icon size={isSoft ? 20 : 18} />
@@ -119,19 +129,27 @@ export function PosShell() {
     >
       <div
         className={`mx-auto grid min-h-svh ${
-          isRail ? 'lg:grid-cols-[72px_1fr] xl:grid-cols-[240px_1fr]' : 'lg:grid-cols-[240px_1fr]'
+          isRail ? 'lg:grid-cols-[72px_1fr] xl:grid-cols-[240px_1fr]' : 'lg:grid-cols-[248px_1fr]'
         }`}
       >
         <aside
-          className="hidden lg:flex lg:flex-col"
-          style={{ background: 'var(--pos-rail)', color: 'var(--pos-rail-ink)' }}
+          className={`pos-rail-border hidden lg:flex lg:flex-col ${lightRail ? 'border-r' : ''}`}
+          style={{
+            background: 'var(--pos-rail)',
+            color: 'var(--pos-rail-ink)',
+            borderColor: 'var(--pos-line)',
+          }}
         >
-          <div className={`border-b border-white/10 ${isRail ? 'px-2 py-5 xl:px-5' : 'px-5 py-6'}`}>
-            <p className={`text-[10px] uppercase tracking-[0.28em] opacity-70 ${isRail ? 'lg:text-center xl:text-left' : ''}`}>
+          <div className={`border-b ${divider} ${isRail ? 'px-2 py-5 xl:px-5' : 'px-5 py-6'}`}>
+            <p
+              className={`text-[10px] uppercase tracking-[0.24em] opacity-70 ${isRail ? 'lg:text-center xl:text-left' : ''}`}
+            >
               Track B POS
             </p>
             <p
-              className={`mt-1 font-[family-name:var(--pos-display)] ${isRail ? 'lg:text-center lg:text-lg xl:text-left xl:text-2xl' : 'text-2xl'}`}
+              className={`mt-1 font-[family-name:var(--pos-display)] font-semibold ${
+                isRail ? 'lg:text-center lg:text-lg xl:text-left xl:text-2xl' : 'text-2xl'
+              }`}
             >
               {isRail ? <span className="lg:inline xl:hidden">BD</span> : null}
               <span className={isRail ? 'lg:hidden xl:inline' : ''}>Bloom Desk</span>
@@ -139,7 +157,7 @@ export function PosShell() {
             <p className={`mt-1 text-xs opacity-70 ${isRail ? 'lg:hidden xl:block' : ''}`}>{theme.name}</p>
           </div>
           {nav}
-          <div className={`mt-auto border-t border-white/10 text-xs opacity-80 ${isRail ? 'p-2 xl:p-4' : 'p-4'}`}>
+          <div className={`mt-auto border-t ${divider} text-xs opacity-80 ${isRail ? 'p-2 xl:p-4' : 'p-4'}`}>
             <p className={isRail ? 'lg:hidden xl:block' : ''}>{user.displayName}</p>
             <button
               type="button"
@@ -152,7 +170,7 @@ export function PosShell() {
           </div>
         </aside>
 
-        <div className="flex min-w-0 flex-col">
+        <div className="flex min-w-0 flex-col pb-20 sm:pb-0">
           {isPeak ? (
             <div
               className="grid grid-cols-2 gap-px border-b sm:grid-cols-4"
@@ -163,10 +181,12 @@ export function PosShell() {
                 <Link
                   key={item.status}
                   to="/admin/orders"
-                  className="bg-[var(--pos-surface)] px-3 py-2 text-center transition hover:bg-[var(--pos-accent-soft)]"
+                  className="bg-[var(--pos-surface)] px-3 py-2.5 text-center transition hover:bg-[var(--pos-accent-soft)]"
                 >
                   <p className="text-[10px] font-bold uppercase tracking-[0.14em]">{statusLabel(item.status)}</p>
-                  <p className="mt-0.5 text-xl font-semibold">{item.count}</p>
+                  <p className="mt-0.5 text-xl font-semibold" style={{ color: 'var(--pos-accent)' }}>
+                    {item.count}
+                  </p>
                 </Link>
               ))}
             </div>
@@ -204,9 +224,9 @@ export function PosShell() {
             className="sticky top-0 z-40 border-b px-4 py-3 backdrop-blur"
             style={{
               borderColor: 'var(--pos-line)',
-              background: isNight
+              background: isNight || isPeak
                 ? 'color-mix(in oklab, var(--pos-bg) 88%, transparent)'
-                : 'color-mix(in oklab, var(--pos-bg) 90%, white)',
+                : 'color-mix(in oklab, var(--pos-bg) 92%, white)',
             }}
           >
             <div className="flex items-center justify-between gap-3">
@@ -228,7 +248,7 @@ export function PosShell() {
               <label className="hidden items-center gap-2 text-xs sm:flex" style={{ color: 'var(--pos-muted)' }}>
                 Theme
                 <select
-                  className="pos-field !py-1.5 text-xs"
+                  className="pos-field !min-h-0 !py-1.5 text-xs"
                   value={themeId}
                   onChange={(e) => setTheme(e.target.value as PosThemeId)}
                   aria-label="POS theme"
@@ -243,9 +263,9 @@ export function PosShell() {
               </label>
               <NavLink
                 to="/admin/orders/new"
-                className={`pos-btn pos-btn-primary ${isSoft ? '!min-h-11 !px-4' : '!min-h-9 !px-3'}`}
+                className={`pos-btn pos-btn-primary hidden sm:inline-flex ${isSoft ? '!min-h-11 !px-4' : '!min-h-9 !px-3'}`}
               >
-                New order
+                + New order
               </NavLink>
             </div>
           </header>
@@ -258,6 +278,18 @@ export function PosShell() {
           </main>
         </div>
       </div>
+
+      {!onNewOrder ? (
+        <Link
+          to="/admin/orders/new"
+          className="pos-btn pos-btn-primary pos-fab sm:hidden"
+          aria-label="New order"
+          data-testid="pos-fab-new-order"
+        >
+          <Plus size={18} />
+          New order
+        </Link>
+      ) : null}
 
       {open ? (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="POS menu">
@@ -272,18 +304,18 @@ export function PosShell() {
             style={{ background: 'var(--pos-rail)', color: 'var(--pos-rail-ink)' }}
             data-testid="pos-mobile-drawer"
           >
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
-              <p className="font-[family-name:var(--pos-display)] text-xl">Bloom Desk</p>
+            <div className={`flex items-center justify-between border-b px-4 py-4 ${divider}`}>
+              <p className="font-[family-name:var(--pos-display)] text-xl font-semibold">Bloom Desk</p>
               <button type="button" aria-label="Close menu" onClick={() => setOpen(false)}>
                 <X />
               </button>
             </div>
             {nav}
-            <div className="mt-auto space-y-3 border-t border-white/10 p-4">
+            <div className={`mt-auto space-y-3 border-t p-4 ${divider}`}>
               <label className="block text-xs opacity-80">
                 Theme
                 <select
-                  className="pos-field mt-1 text-ink"
+                  className="pos-field mt-1"
                   value={themeId}
                   onChange={(e) => setTheme(e.target.value as PosThemeId)}
                   data-testid="pos-theme-select-mobile"

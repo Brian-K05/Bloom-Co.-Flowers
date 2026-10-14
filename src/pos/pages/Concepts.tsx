@@ -3,6 +3,14 @@ import { usePosTheme } from '../PosThemeProvider'
 import { posThemes } from '../themes/registry'
 import type { PosThemeId } from '../types'
 
+const swatches: Record<PosThemeId, string[]> = {
+  'counter-clear': ['#F7F8F5', '#A7BFA3', '#2E3A2F'],
+  'peak-board': ['#000000', '#FFFFFF', '#FF6B6B'],
+  'bloom-ledger': ['#FFF8F6', '#E89BA7', '#6B4F4F'],
+  'night-shift': ['#1A1A1A', '#0FF3C7', '#E6E7E8'],
+  'studio-grid': ['#F6F7F3', '#7C8F68', '#1B1B1B'],
+}
+
 export function PosConceptsPage() {
   const { themeId, setTheme, theme } = usePosTheme()
 
@@ -11,13 +19,13 @@ export function PosConceptsPage() {
       <div>
         <h1 className="text-3xl">POS concepts</h1>
         <p className="mt-1 max-w-2xl text-sm" style={{ color: 'var(--pos-muted)' }}>
-          Five switchable admin shells for the same Track B features. Default for presentation:{' '}
-          <strong>Counter Clear</strong>. Flip live during walkthrough — orders and stock stay intact.
+          Five switchable Bloom Desk shells from the UI Concepts Board. Same Track B features — flip live for the
+          owner walkthrough. Default: <strong>Counter Clear</strong>.
         </p>
       </div>
 
       <p className="mt-4 text-sm">
-        Active: <span className="font-semibold">{theme.name}</span> ({theme.number})
+        Active: <span className="font-semibold">{theme.name}</span> · {theme.pitch}
       </p>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -36,7 +44,17 @@ export function PosConceptsPage() {
                 {item.number} · {item.mood}
               </p>
               <h2 className="mt-2 text-2xl">{item.name}</h2>
-              <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--pos-muted)' }}>
+              <div className="mt-3 flex gap-2">
+                {swatches[item.id].map((hex) => (
+                  <span
+                    key={hex}
+                    className="h-7 w-7 rounded-full border"
+                    style={{ background: hex, borderColor: 'var(--pos-line)' }}
+                    title={hex}
+                  />
+                ))}
+              </div>
+              <p className="mt-3 text-sm leading-relaxed" style={{ color: 'var(--pos-muted)' }}>
                 {item.description}
               </p>
               <p className="mt-3 text-xs uppercase tracking-[0.14em]" style={{ color: 'var(--pos-accent)' }}>
@@ -58,18 +76,17 @@ export function PosConceptsPage() {
         <h2 className="text-xl">Presenter path</h2>
         <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed">
           <li>
-            Login at <Link to="/admin/login" className="underline">/admin/login</Link> — owner / staff, password{' '}
-            <code className="pos-mono">demo123</code>
+            Login <Link to="/admin/login" className="underline">/admin/login</Link> —{' '}
+            <code className="pos-mono">owner</code> / <code className="pos-mono">demo123</code>
           </li>
-          <li>
-            Encode a Messenger order on <Link to="/admin/orders/new" className="underline">New order</Link>
-          </li>
-          <li>Confirm → watch inventory deduct</li>
-          <li>Show Calendar + Pre-orders on a peak date filter</li>
-          <li>Switch all five concepts here without losing demo data</li>
+          <li>Start on Counter Clear dashboard — greeting, today table, low stock, reminders</li>
+          <li>Encode a Messenger order → Confirm → stock deducts</li>
+          <li>Flip to Peak Board for kanban war room</li>
+          <li>Show Bloom Ledger on phone width, Night Shift week strip, Studio Grid split New Order</li>
         </ol>
         <p className="mt-4 text-sm" style={{ color: 'var(--pos-muted)' }}>
-          Meta Messenger automation and AI bot are Phase 2 (Track A) on the same data model — not in this demo.
+          Tip: Encode from Messenger? Select <strong>Messenger</strong> as the source. Cancel restores stock if already
+          deducted.
         </p>
       </div>
     </div>

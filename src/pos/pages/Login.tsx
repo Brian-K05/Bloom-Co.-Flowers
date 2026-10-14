@@ -24,12 +24,13 @@ export function PosLoginPage() {
   return (
     <div className="pos-app grid min-h-svh place-items-center px-5">
       <form onSubmit={onSubmit} className="pos-surface w-full max-w-md p-8 shadow-sm">
-        <p className="text-[11px] uppercase tracking-[0.28em]" style={{ color: 'var(--pos-muted)' }}>
-          Track B POS
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: 'var(--pos-muted)' }}>
+          Bloom Desk · Track B
         </p>
         <h1 className="mt-2 text-3xl">Shop desk login</h1>
-        <p className="mt-2 text-sm" style={{ color: 'var(--pos-muted)' }}>
-          Demo: <span className="pos-mono">owner</span> or <span className="pos-mono">staff</span> /{' '}
+        <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--pos-muted)' }}>
+          Admin POS for Messenger-encoded orders. Demo:{' '}
+          <span className="pos-mono">owner</span> or <span className="pos-mono">staff</span> /{' '}
           <span className="pos-mono">demo123</span>
         </p>
         <label className="pos-label mt-8">
@@ -59,6 +60,9 @@ export function PosLoginPage() {
         <button type="submit" className="pos-btn pos-btn-primary mt-6 w-full">
           Enter POS
         </button>
+        <p className="mt-4 text-xs" style={{ color: 'var(--pos-muted)' }}>
+          Confirm stock before saving when encoding from chat. Meta automation is Phase 2.
+        </p>
       </form>
     </div>
   )

@@ -16,17 +16,17 @@ test.describe('Track B POS', () => {
 
   test('demo login reaches dashboard', async ({ page }) => {
     await login(page)
-    await expect(page.getByRole('heading', { name: /today at the desk/i })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /good (morning|afternoon|evening)/i })).toBeVisible()
   })
 
   test('create messenger order and confirm deducts stock', async ({ page }) => {
     await login(page)
 
-    await page.getByRole('link', { name: /inventory/i }).click()
+    await page.getByRole('navigation').getByRole('link', { name: /^inventory$/i }).click()
     const productCard = page.locator('article').filter({ hasText: 'Blush Romance' }).first()
     const before = Number(await productCard.getByLabel('Set stock').inputValue())
 
-    await page.getByRole('link', { name: /new order/i }).first().click()
+    await page.getByRole('navigation').getByRole('link', { name: /new order/i }).click()
     await page.getByLabel('Customer name').fill('Playwright Customer')
     await page.getByLabel('Customer phone').fill('+63 900 111 2222')
     await page.getByLabel('Source').selectOption('messenger')
@@ -41,21 +41,21 @@ test.describe('Track B POS', () => {
     await page.getByRole('button', { name: /^confirmed$/i }).click()
     await expect(page.getByText(/Stock applied:\s*Yes/i)).toBeVisible()
 
-    await page.getByRole('link', { name: /inventory/i }).click()
+    await page.getByRole('navigation').getByRole('link', { name: /^inventory$/i }).click()
     const after = Number(await productCard.getByLabel('Set stock').inputValue())
     expect(after).toBe(before - 1)
   })
 
   test('orders filters and calendar visible', async ({ page }) => {
     await login(page)
-    await page.getByRole('link', { name: /^orders$/i }).click()
+    await page.getByRole('navigation').getByRole('link', { name: /^orders$/i }).click()
     await expect(page.getByRole('heading', { name: /^orders$/i })).toBeVisible()
     await expect(page.getByLabel('Schedule date')).toBeVisible()
     await expect(page.getByLabel('Location')).toBeVisible()
     await expect(page.getByLabel('Status')).toBeVisible()
     await expect(page.getByLabel('Source')).toBeVisible()
 
-    await page.getByRole('link', { name: /calendar/i }).click()
+    await page.getByRole('navigation').getByRole('link', { name: /calendar/i }).click()
     await expect(page.getByRole('heading', { name: /calendar/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /this week/i })).toBeVisible()
   })
@@ -80,7 +80,8 @@ test.describe('Track B POS', () => {
     await login(page)
     await page.getByTestId('pos-mobile-menu').click()
     await expect(page.getByTestId('pos-mobile-drawer')).toBeVisible()
-    await page.getByRole('link', { name: /inventory/i }).click()
+    await page.getByTestId('pos-mobile-drawer').getByRole('link', { name: /^inventory$/i }).click()
     await expect(page.getByRole('heading', { name: /inventory/i })).toBeVisible()
+    await expect(page.getByTestId('pos-fab-new-order')).toBeVisible()
   })
 })

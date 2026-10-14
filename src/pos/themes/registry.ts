@@ -7,6 +7,7 @@ export type PosThemeMeta = {
   mood: string
   description: string
   layout: 'rail' | 'kanban' | 'soft' | 'night' | 'split'
+  pitch: string
 }
 
 export const posThemes: PosThemeMeta[] = [
@@ -14,41 +15,46 @@ export const posThemes: PosThemeMeta[] = [
     id: 'counter-clear',
     number: '01',
     name: 'Counter Clear',
-    mood: 'Calm · Dense',
-    description: 'Left icon rail and a dense workbench — New Order always one click away.',
+    mood: 'Calm · Dense workbench',
+    description: 'Light stone + sage. Slim left icon rail and a dense desk — New Order always one click.',
     layout: 'rail',
+    pitch: 'Recommended presentation default.',
   },
   {
     id: 'peak-board',
     number: '02',
     name: 'Peak Board',
-    mood: 'Urgent · Ops',
-    description: 'War-room board with status columns for peak days like Valentine’s.',
+    mood: 'Urgent · War room',
+    description: 'Black / white / coral. Top status strip + kanban columns for Valentine’s-level days.',
     layout: 'kanban',
+    pitch: 'Lead with this for peak-day story.',
   },
   {
     id: 'bloom-ledger',
     number: '03',
     name: 'Bloom Ledger',
     mood: 'Warm · Touch',
-    description: 'Soft boutique desk with large touch targets for phone use in the shop.',
+    description: 'Paper + rose. Soft sidebar, large touch targets for phone use behind the counter.',
     layout: 'soft',
+    pitch: 'Best for phone-first staff.',
   },
   {
     id: 'night-shift',
     number: '04',
     name: 'Night Shift',
     mood: 'Dark · Focus',
-    description: 'Low-glare cockpit with monospace IDs and a week-first calendar strip.',
+    description: 'Charcoal + mint. Week strip first, monospace IDs, low-glare evening prep.',
     layout: 'night',
+    pitch: 'After-hours encoding.',
   },
   {
     id: 'studio-grid',
     number: '05',
     name: 'Studio Grid',
     mood: 'Editorial · Split',
-    description: 'Inventory grid beside a live order form — studio prep energy.',
+    description: 'Olive + ink. Stock grid left, live order form right — studio prep energy.',
     layout: 'split',
+    pitch: 'Inventory-led encoding.',
   },
 ]
 

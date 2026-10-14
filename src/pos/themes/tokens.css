@@ -1,96 +1,130 @@
-/* POS theme tokens — scoped via html[data-pos-theme] */
+/* Bloom Desk POS — theme tokens from UI Concepts Board */
 
 html[data-pos-theme] {
-  --pos-bg: #f4f2ee;
+  --pos-bg: #f7f8f5;
   --pos-surface: #ffffff;
-  --pos-ink: #1c1b19;
-  --pos-muted: #6b6560;
-  --pos-accent: #3f6b57;
-  --pos-accent-soft: #dce8e1;
-  --pos-danger: #b42318;
-  --pos-line: #e4e0d8;
-  --pos-chip: #eef2ef;
-  --pos-rail: #1f2a24;
-  --pos-rail-ink: #f4f2ee;
-  --pos-font: "Outfit", "Segoe UI", sans-serif;
-  --pos-display: "Outfit", "Segoe UI", sans-serif;
-  --pos-radius: 10px;
-  --pos-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --pos-ink: #2e3a2f;
+  --pos-muted: #6b756c;
+  --pos-accent: #a7bfa3;
+  --pos-accent-ink: #1f2a22;
+  --pos-accent-soft: #e4eee2;
+  --pos-danger: #e85d5d;
+  --pos-line: #e3e8e1;
+  --pos-chip: #eef2ee;
+  --pos-rail: #ffffff;
+  --pos-rail-ink: #2e3a2f;
+  --pos-font: "Inter", "Segoe UI", sans-serif;
+  --pos-display: "Inter", "Segoe UI", sans-serif;
+  --pos-mono: "Roboto Mono", ui-monospace, monospace;
+  --pos-radius: 12px;
+  --pos-status-pending: #eceff1;
+  --pos-status-pending-ink: #546e7a;
+  --pos-status-confirmed: #d9f0df;
+  --pos-status-confirmed-ink: #1b7a3c;
+  --pos-status-preparing: #ffe8cc;
+  --pos-status-preparing-ink: #b45b00;
+  --pos-status-ready: #e8dff8;
+  --pos-status-ready-ink: #6b3fa0;
+  --pos-status-completed: #d4f5f0;
+  --pos-status-completed-ink: #0f766e;
+  --pos-status-cancelled: #ffe0e0;
+  --pos-status-cancelled-ink: #c62828;
 }
 
 html[data-pos-theme='counter-clear'] {
-  --pos-bg: #f1f0ec;
+  --pos-bg: #f7f8f5;
   --pos-surface: #ffffff;
-  --pos-ink: #1c1b19;
-  --pos-muted: #6a655f;
-  --pos-accent: #3f6b57;
-  --pos-accent-soft: #d9e7df;
-  --pos-line: #ddd8cf;
-  --pos-rail: #24312b;
-  --pos-rail-ink: #f6f4f0;
-  --pos-radius: 8px;
+  --pos-ink: #2e3a2f;
+  --pos-muted: #6b756c;
+  --pos-accent: #7fa37a;
+  --pos-accent-ink: #ffffff;
+  --pos-accent-soft: #e4eee2;
+  --pos-line: #e3e8e1;
+  --pos-chip: #eef2ee;
+  --pos-rail: #ffffff;
+  --pos-rail-ink: #2e3a2f;
+  --pos-radius: 12px;
+  --pos-font: "Inter", "Segoe UI", sans-serif;
+  --pos-display: "Inter", "Segoe UI", sans-serif;
+  --pos-mono: "Roboto Mono", ui-monospace, monospace;
 }
 
 html[data-pos-theme='peak-board'] {
-  --pos-bg: #f7f7f5;
-  --pos-surface: #ffffff;
-  --pos-ink: #0a0a0a;
-  --pos-muted: #525252;
-  --pos-accent: #e11d48;
-  --pos-accent-soft: #ffe4e9;
-  --pos-line: #111111;
-  --pos-chip: #111111;
-  --pos-rail: #0a0a0a;
-  --pos-rail-ink: #fafafa;
-  --pos-radius: 0px;
-  --pos-display: "Space Grotesk", "Segoe UI", sans-serif;
+  --pos-bg: #0a0a0a;
+  --pos-surface: #141414;
+  --pos-ink: #ffffff;
+  --pos-muted: #a3a3a3;
+  --pos-accent: #ff6b6b;
+  --pos-accent-ink: #ffffff;
+  --pos-accent-soft: #3a1515;
+  --pos-danger: #ff6b6b;
+  --pos-line: #2a2a2a;
+  --pos-chip: #1f1f1f;
+  --pos-rail: #000000;
+  --pos-rail-ink: #ffffff;
+  --pos-radius: 4px;
+  --pos-font: "Inter", "Segoe UI", sans-serif;
+  --pos-display: "Inter", "Segoe UI", sans-serif;
+  --pos-mono: "Roboto Mono", ui-monospace, monospace;
+  color-scheme: dark;
 }
 
 html[data-pos-theme='bloom-ledger'] {
-  --pos-bg: #f7efe6;
-  --pos-surface: #fffaf4;
-  --pos-ink: #3a2f26;
-  --pos-muted: #7a6a5c;
-  --pos-accent: #b56b7a;
-  --pos-accent-soft: #f3dde2;
-  --pos-line: #e5d5c6;
-  --pos-chip: #f3e7dc;
-  --pos-rail: #4a3530;
-  --pos-rail-ink: #fff8f2;
-  --pos-radius: 16px;
-  --pos-display: "Zilla Slab", Georgia, serif;
+  --pos-bg: #fff8f6;
+  --pos-surface: #ffffff;
+  --pos-ink: #6b4f4f;
+  --pos-muted: #9a7d7d;
+  --pos-accent: #e89ba7;
+  --pos-accent-ink: #ffffff;
+  --pos-accent-soft: #fce8ec;
+  --pos-danger: #d96b6b;
+  --pos-line: #f0ddd8;
+  --pos-chip: #f8ece9;
+  --pos-rail: #fff1ed;
+  --pos-rail-ink: #6b4f4f;
+  --pos-radius: 18px;
+  --pos-font: "Inter", "Segoe UI", sans-serif;
+  --pos-display: "Plus Jakarta Sans", "Inter", sans-serif;
+  --pos-mono: "Roboto Mono", ui-monospace, monospace;
 }
 
 html[data-pos-theme='night-shift'] {
-  --pos-bg: #101418;
-  --pos-surface: #171c22;
-  --pos-ink: #e8eef4;
-  --pos-muted: #9aabba;
-  --pos-accent: #5eead4;
-  --pos-accent-soft: #134e4a;
-  --pos-danger: #fb7185;
-  --pos-line: #2a3440;
-  --pos-chip: #1f2933;
-  --pos-rail: #0b0e11;
-  --pos-rail-ink: #e8eef4;
-  --pos-radius: 12px;
-  --pos-display: "IBM Plex Sans", "Segoe UI", sans-serif;
+  --pos-bg: #1a1a1a;
+  --pos-surface: #222222;
+  --pos-ink: #e6e7e8;
+  --pos-muted: #9aa0a6;
+  --pos-accent: #0ff3c7;
+  --pos-accent-ink: #042f2a;
+  --pos-accent-soft: #123d35;
+  --pos-danger: #ff7b8a;
+  --pos-line: #333333;
+  --pos-chip: #2a2a2a;
+  --pos-rail: #111111;
+  --pos-rail-ink: #e6e7e8;
+  --pos-radius: 10px;
+  --pos-font: "Inter", "Segoe UI", sans-serif;
+  --pos-display: "Space Grotesk", "Inter", sans-serif;
+  --pos-mono: "JetBrains Mono", ui-monospace, monospace;
   color-scheme: dark;
 }
 
 html[data-pos-theme='studio-grid'] {
-  --pos-bg: #faf9f6;
+  --pos-bg: #f6f7f3;
   --pos-surface: #ffffff;
-  --pos-ink: #1f2a24;
-  --pos-muted: #66736c;
-  --pos-accent: #5a6b3f;
-  --pos-accent-soft: #e6ebda;
-  --pos-line: #e2e4dc;
+  --pos-ink: #1b1b1b;
+  --pos-muted: #6b7166;
+  --pos-accent: #7c8f68;
+  --pos-accent-ink: #ffffff;
+  --pos-accent-soft: #e8ede0;
+  --pos-danger: #c45c5c;
+  --pos-line: #e2e5db;
   --pos-chip: #eef1e8;
-  --pos-rail: #2a3328;
-  --pos-rail-ink: #f7f8f3;
-  --pos-radius: 4px;
-  --pos-display: "Newsreader", Georgia, serif;
+  --pos-rail: #ffffff;
+  --pos-rail-ink: #1b1b1b;
+  --pos-radius: 8px;
+  --pos-font: "Inter", "Segoe UI", sans-serif;
+  --pos-display: "Sora", "Inter", sans-serif;
+  --pos-mono: "Roboto Mono", ui-monospace, monospace;
 }
 
 .pos-app {
@@ -104,6 +138,7 @@ html[data-pos-theme='studio-grid'] {
 .pos-app h2,
 .pos-app h3 {
   font-family: var(--pos-display);
+  letter-spacing: -0.02em;
 }
 
 .pos-surface {
@@ -118,23 +153,22 @@ html[data-pos-theme='studio-grid'] {
   justify-content: center;
   gap: 0.4rem;
   min-height: 2.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: var(--pos-radius);
+  padding: 0.55rem 1.1rem;
+  border-radius: calc(var(--pos-radius) * 0.85);
   border: 1px solid transparent;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   transition: 160ms ease;
 }
 
 .pos-btn-primary {
   background: var(--pos-accent);
-  color: #fffaf6;
+  color: var(--pos-accent-ink);
 }
 
-html[data-pos-theme='night-shift'] .pos-btn-primary {
-  color: #042f2e;
+.pos-btn-primary:hover {
+  filter: brightness(0.96);
 }
 
 .pos-btn-secondary {
@@ -154,21 +188,27 @@ html[data-pos-theme='night-shift'] .pos-btn-primary {
   background: var(--pos-surface);
   color: var(--pos-ink);
   border-radius: calc(var(--pos-radius) * 0.7);
-  padding: 0.65rem 0.75rem;
-  font-size: 0.9rem;
+  padding: 0.7rem 0.85rem;
+  font-size: 0.92rem;
+  min-height: 2.75rem;
+}
+
+.pos-soft .pos-field {
+  min-height: 3rem;
 }
 
 .pos-field:focus {
-  outline: 2px solid color-mix(in oklab, var(--pos-accent) 45%, transparent);
+  outline: 2px solid color-mix(in oklab, var(--pos-accent) 50%, transparent);
   outline-offset: 1px;
 }
 
 .pos-label {
   display: block;
   margin-bottom: 0.35rem;
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  font-weight: 600;
   color: var(--pos-muted);
 }
 
@@ -177,16 +217,24 @@ html[data-pos-theme='night-shift'] .pos-btn-primary {
 }
 
 .pos-soft .pos-btn {
-  min-height: 2.85rem;
+  min-height: 3rem;
   border-radius: calc(var(--pos-radius) * 0.85);
 }
 
 .pos-peak .pos-surface {
-  border-radius: 0;
+  border-radius: 6px;
 }
 
 .pos-night .pos-mono {
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
+}
+
+.pos-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 45;
+  box-shadow: 0 10px 28px color-mix(in oklab, var(--pos-ink) 18%, transparent);
 }
 
 @keyframes posDrawer {
@@ -213,4 +261,10 @@ html[data-pos-theme='night-shift'] .pos-btn-primary {
 
 .pos-app [data-status-badge] {
   animation: posChipIn 160ms ease;
+}
+
+html[data-pos-theme='counter-clear'] .pos-rail-border,
+html[data-pos-theme='studio-grid'] .pos-rail-border,
+html[data-pos-theme='bloom-ledger'] .pos-rail-border {
+  border-right: 1px solid var(--pos-line);
 }

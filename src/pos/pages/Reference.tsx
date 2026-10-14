@@ -17,11 +17,15 @@ export function PosReferencePage() {
     setBody(article.body)
   }
 
-  function save() {
+  async function save() {
     if (!editingId) return
-    updateArticle(editingId, { title: title.trim(), body: body.trim() })
-    notify('Article saved')
-    setEditingId(null)
+    try {
+      await updateArticle(editingId, { title: title.trim(), body: body.trim() })
+      notify('Article saved')
+      setEditingId(null)
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Could not save article')
+    }
   }
 
   return (

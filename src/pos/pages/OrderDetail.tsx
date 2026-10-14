@@ -42,14 +42,14 @@ function OrderDetailView({ order }: { order: PosOrder }) {
   const [wrapper, setWrapper] = useState(order.customization.wrapper)
   const [cardMessage, setCardMessage] = useState(order.customization.cardMessage)
 
-  function changeStatus(status: PosOrderStatus) {
-    const result = setOrderStatus(order.id, status)
+  async function changeStatus(status: PosOrderStatus) {
+    const result = await setOrderStatus(order.id, status)
     if (!result.ok) notify(result.error ?? 'Could not update status')
     else notify(`Updated to ${statusLabel(status)}`)
   }
 
-  function saveCustomization() {
-    updateOrder(
+  async function saveCustomization() {
+    await updateOrder(
       order.id,
       {
         customization: {

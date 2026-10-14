@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useToast } from '../../context/ToastContext'
 import { formatPHP, todayISODate } from '../../lib/format'
 import { usePosAuth } from '../auth/PosAuthContext'
 import { usePosTheme } from '../PosThemeProvider'
@@ -9,9 +10,10 @@ import type { PosOrder, PosOrderStatus } from '../types'
 const boardColumns: PosOrderStatus[] = ['pending', 'confirmed', 'preparing', 'ready_out']
 
 export function PosDashboardPage() {
-  const { orders, products, resetDemo, getProduct } = usePos()
+  const { orders, products, resetDemo, getProduct, backend } = usePos()
   const { theme } = usePosTheme()
   const { user } = usePosAuth()
+  const { notify } = useToast()
   const today = todayISODate()
   const todayOrders = orders.filter((o) => o.scheduleDate === today && o.status !== 'cancelled')
   const deliveries = todayOrders.filter((o) => o.fulfillment === 'delivery').length
@@ -45,7 +47,17 @@ export function PosDashboardPage() {
           <Link to="/admin/orders/new" className="pos-btn pos-btn-primary">
             + New order
           </Link>
-          <button type="button" className="pos-btn pos-btn-secondary" onClick={resetDemo}>
+          <button
+            type="button"
+            className="pos-btn pos-btn-secondary"
+            onClick={() => {
+              void resetDemo()
+                .then(() => notify(backend === 'supabase' ? 'Supabase demo data reset' : 'Local demo data reset'))
+                .catch((err: unknown) =>
+                  notify(err instanceof Error ? err.message : 'Reset failed'),
+                )
+            }}
+          >
             Reset demo
           </button>
         </div>

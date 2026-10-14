@@ -68,8 +68,13 @@ export function PosPreordersPage() {
                   className="h-4 w-4"
                   checked={order.reminderDone}
                   onChange={() => {
-                    toggleReminderDone(order.id)
-                    notify(order.reminderDone ? 'Reminder reopened' : 'Reminder marked done')
+                    void toggleReminderDone(order.id)
+                      .then(() =>
+                        notify(order.reminderDone ? 'Reminder reopened' : 'Reminder marked done'),
+                      )
+                      .catch((err: unknown) =>
+                        notify(err instanceof Error ? err.message : 'Could not update reminder'),
+                      )
                   }}
                 />
                 Supplier ordered

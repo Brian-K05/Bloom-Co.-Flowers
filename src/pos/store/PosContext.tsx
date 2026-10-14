@@ -2,11 +2,25 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from 'react'
+import { isSupabaseConfigured } from '../../lib/supabase'
 import { clearStorage, readStorage, writeStorage } from '../../lib/storage'
+import {
+  apiCreateOrder,
+  apiDeleteProduct,
+  apiResetDemo,
+  apiRestockProduct,
+  apiSetOrderStatus,
+  apiUpdateArticle,
+  apiUpdateOrder,
+  apiUpdateProductStock,
+  apiUpsertProduct,
+  fetchPosSnapshot,
+} from '../api/posApi'
 import { usePosAuth } from '../auth/PosAuthContext'
 import { seedArticles, seedOrders, seedProducts } from '../seed'
 import type {
@@ -27,16 +41,21 @@ type PosContextValue = {
   products: PosProduct[]
   orders: PosOrder[]
   articles: PosArticle[]
-  createOrder: (input: PosOrderInput) => PosOrder | null
-  updateOrder: (id: string, patch: Partial<PosOrder>, historyText?: string) => void
-  setOrderStatus: (id: string, status: PosOrderStatus) => { ok: boolean; error?: string }
-  restockProduct: (id: string, qty: number) => void
-  updateProductStock: (id: string, qty: number) => void
-  upsertProduct: (product: PosProduct) => void
-  deleteProduct: (id: string) => void
-  toggleReminderDone: (orderId: string) => void
-  updateArticle: (id: string, patch: Partial<PosArticle>) => void
-  resetDemo: () => void
+  ready: boolean
+  loading: boolean
+  error: string | null
+  backend: 'supabase' | 'local'
+  refresh: () => Promise<void>
+  createOrder: (input: PosOrderInput) => Promise<PosOrder | null>
+  updateOrder: (id: string, patch: Partial<PosOrder>, historyText?: string) => Promise<void>
+  setOrderStatus: (id: string, status: PosOrderStatus) => Promise<{ ok: boolean; error?: string }>
+  restockProduct: (id: string, qty: number) => Promise<void>
+  updateProductStock: (id: string, qty: number) => Promise<void>
+  upsertProduct: (product: PosProduct) => Promise<void>
+  deleteProduct: (id: string) => Promise<void>
+  toggleReminderDone: (orderId: string) => Promise<void>
+  updateArticle: (id: string, patch: Partial<PosArticle>) => Promise<void>
+  resetDemo: () => Promise<void>
   getOrder: (id: string) => PosOrder | undefined
   getProduct: (id: string) => PosProduct | undefined
 }
@@ -77,130 +96,165 @@ function applyStock(
 
 export function PosProvider({ children }: { children: ReactNode }) {
   const { user } = usePosAuth()
-  const [products, setProducts] = useState<PosProduct[]>(() =>
-    readStorage(KEYS.products, seedProducts),
-  )
-  const [orders, setOrders] = useState<PosOrder[]>(() => readStorage(KEYS.orders, seedOrders))
-  const [articles, setArticles] = useState<PosArticle[]>(() =>
-    readStorage(KEYS.articles, seedArticles),
-  )
-
-  const persistProducts = useCallback((next: PosProduct[]) => {
-    setProducts(next)
-    writeStorage(KEYS.products, next)
-  }, [])
-
-  const persistOrders = useCallback((next: PosOrder[]) => {
-    setOrders(next)
-    writeStorage(KEYS.orders, next)
-  }, [])
-
-  const persistArticles = useCallback((next: PosArticle[]) => {
-    setArticles(next)
-    writeStorage(KEYS.articles, next)
-  }, [])
+  const backend: 'supabase' | 'local' = isSupabaseConfigured ? 'supabase' : 'local'
+  const [products, setProducts] = useState<PosProduct[]>([])
+  const [orders, setOrders] = useState<PosOrder[]>([])
+  const [articles, setArticles] = useState<PosArticle[]>([])
+  const [loading, setLoading] = useState(true)
+  const [ready, setReady] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const actor = user?.displayName ?? 'Staff'
 
-  const createOrder = useCallback(
-    (input: PosOrderInput) => {
-      const lines: PosOrder['items'] = []
-      for (const line of input.items) {
-        const product = products.find((p) => p.id === line.productId)
-        if (!product || line.quantity < 1) return null
-        if (product.stockQty < line.quantity && !input.isPreorder) {
-          return null
-        }
-        lines.push({
-          productId: product.id,
-          name: product.name,
-          price: product.price,
-          quantity: line.quantity,
-        })
-      }
-      if (!lines.length) return null
-      const subtotal = lines.reduce((sum, l) => sum + l.price * l.quantity, 0)
-      const order: PosOrder = {
-        id: nextPosId(orders),
-        createdAt: new Date().toISOString(),
-        source: input.source,
-        status: 'pending',
-        customerName: input.customerName.trim(),
-        customerPhone: input.customerPhone.trim(),
-        recipientName: input.recipientName.trim(),
-        recipientPhone: input.recipientPhone.trim(),
-        location: input.location,
-        fulfillment: input.fulfillment,
-        scheduleDate: input.scheduleDate,
-        items: lines,
-        customization: input.customization,
-        isPreorder: input.isPreorder,
-        supplierNote: input.supplierNote,
-        reminderDue: input.isPreorder ? input.reminderDue : null,
-        reminderDone: false,
-        history: [
-          {
-            at: new Date().toISOString(),
-            by: actor,
-            text: `Order encoded from ${input.source}`,
-          },
-        ],
-        subtotal,
-        total: subtotal,
-        stockApplied: false,
-      }
-      persistOrders([order, ...orders])
-      return order
+  const persistLocal = useCallback(
+    (nextProducts: PosProduct[], nextOrders: PosOrder[], nextArticles: PosArticle[]) => {
+      setProducts(nextProducts)
+      setOrders(nextOrders)
+      setArticles(nextArticles)
+      writeStorage(KEYS.products, nextProducts)
+      writeStorage(KEYS.orders, nextOrders)
+      writeStorage(KEYS.articles, nextArticles)
     },
-    [actor, orders, persistOrders, products],
+    [],
+  )
+
+  const refresh = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      if (backend === 'supabase') {
+        const snap = await fetchPosSnapshot()
+        setProducts(snap.products)
+        setOrders(snap.orders)
+        setArticles(snap.articles)
+      } else {
+        setProducts(readStorage(KEYS.products, seedProducts))
+        setOrders(readStorage(KEYS.orders, seedOrders))
+        setArticles(readStorage(KEYS.articles, seedArticles))
+      }
+      setReady(true)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to load POS data'
+      setError(message)
+      setReady(false)
+    } finally {
+      setLoading(false)
+    }
+  }, [backend])
+
+  useEffect(() => {
+    void refresh()
+  }, [refresh])
+
+  const createOrder = useCallback(
+    async (input: PosOrderInput) => {
+      try {
+        if (backend === 'supabase') {
+          const order = await apiCreateOrder(input, products, orders, actor)
+          setOrders((prev) => [order, ...prev])
+          return order
+        }
+        const lines: PosOrder['items'] = []
+        for (const line of input.items) {
+          const product = products.find((p) => p.id === line.productId)
+          if (!product || line.quantity < 1) return null
+          if (product.stockQty < line.quantity && !input.isPreorder) return null
+          lines.push({
+            productId: product.id,
+            name: product.name,
+            price: product.price,
+            quantity: line.quantity,
+          })
+        }
+        if (!lines.length) return null
+        const subtotal = lines.reduce((sum, l) => sum + l.price * l.quantity, 0)
+        const order: PosOrder = {
+          id: nextPosId(orders),
+          createdAt: new Date().toISOString(),
+          source: input.source,
+          status: 'pending',
+          customerName: input.customerName.trim(),
+          customerPhone: input.customerPhone.trim(),
+          recipientName: input.recipientName.trim(),
+          recipientPhone: input.recipientPhone.trim(),
+          location: input.location,
+          fulfillment: input.fulfillment,
+          scheduleDate: input.scheduleDate,
+          items: lines,
+          customization: input.customization,
+          isPreorder: input.isPreorder,
+          supplierNote: input.supplierNote,
+          reminderDue: input.isPreorder ? input.reminderDue : null,
+          reminderDone: false,
+          history: [
+            { at: new Date().toISOString(), by: actor, text: `Order encoded from ${input.source}` },
+          ],
+          subtotal,
+          total: subtotal,
+          stockApplied: false,
+        }
+        const nextOrders = [order, ...orders]
+        persistLocal(products, nextOrders, articles)
+        return order
+      } catch {
+        return null
+      }
+    },
+    [actor, articles, backend, orders, persistLocal, products],
   )
 
   const updateOrder = useCallback(
-    (id: string, patch: Partial<PosOrder>, historyText?: string) => {
-      persistOrders(
-        orders.map((order) => {
-          if (order.id !== id) return order
-          const next = { ...order, ...patch, id: order.id }
-          if (historyText) {
-            next.history = [
-              ...order.history,
-              { at: new Date().toISOString(), by: actor, text: historyText },
-            ]
-          }
-          return next
-        }),
-      )
+    async (id: string, patch: Partial<PosOrder>, historyText?: string) => {
+      const current = orders.find((o) => o.id === id)
+      if (!current) return
+      if (backend === 'supabase') {
+        const updated = await apiUpdateOrder(id, patch, historyText, actor, current)
+        setOrders((prev) => prev.map((o) => (o.id === id ? updated : o)))
+        return
+      }
+      const nextOrders = orders.map((order) => {
+        if (order.id !== id) return order
+        const next = { ...order, ...patch, id: order.id }
+        if (historyText) {
+          next.history = [
+            ...order.history,
+            { at: new Date().toISOString(), by: actor, text: historyText },
+          ]
+        }
+        return next
+      })
+      persistLocal(products, nextOrders, articles)
     },
-    [actor, orders, persistOrders],
+    [actor, articles, backend, orders, persistLocal, products],
   )
 
   const setOrderStatus = useCallback(
-    (id: string, status: PosOrderStatus) => {
+    async (id: string, status: PosOrderStatus) => {
       const order = orders.find((o) => o.id === id)
       if (!order) return { ok: false, error: 'Order not found' }
-      if (order.status === status) return { ok: true }
-
-      let nextProducts = products
-      let stockApplied = order.stockApplied
-
-      if (status === 'confirmed' && !order.stockApplied) {
-        const result = applyStock(products, order.items, 'deduct')
-        if (!result.ok) return { ok: false, error: result.error }
-        nextProducts = result.products
-        stockApplied = true
-      }
-
-      if (status === 'cancelled' && order.stockApplied) {
-        const result = applyStock(products, order.items, 'restore')
-        if (!result.ok) return { ok: false, error: result.error }
-        nextProducts = result.products
-        stockApplied = false
-      }
-
-      if (nextProducts !== products) persistProducts(nextProducts)
-
-      persistOrders(
-        orders.map((o) =>
+      try {
+        if (backend === 'supabase') {
+          const result = await apiSetOrderStatus(id, status, actor, order, products)
+          setOrders((prev) => prev.map((o) => (o.id === id ? result.order : o)))
+          setProducts(result.products)
+          return { ok: true }
+        }
+        if (order.status === status) return { ok: true }
+        let nextProducts = products
+        let stockApplied = order.stockApplied
+        if (status === 'confirmed' && !order.stockApplied) {
+          const result = applyStock(products, order.items, 'deduct')
+          if (!result.ok) return { ok: false, error: result.error }
+          nextProducts = result.products
+          stockApplied = true
+        }
+        if (status === 'cancelled' && order.stockApplied) {
+          const result = applyStock(products, order.items, 'restore')
+          if (!result.ok) return { ok: false, error: result.error }
+          nextProducts = result.products
+          stockApplied = false
+        }
+        const nextOrders = orders.map((o) =>
           o.id === id
             ? {
                 ...o,
@@ -221,100 +275,146 @@ export function PosProvider({ children }: { children: ReactNode }) {
                 ],
               }
             : o,
-        ),
-      )
-      return { ok: true }
+        )
+        persistLocal(nextProducts, nextOrders, articles)
+        return { ok: true }
+      } catch (err) {
+        return { ok: false, error: err instanceof Error ? err.message : 'Status update failed' }
+      }
     },
-    [actor, orders, persistOrders, persistProducts, products],
+    [actor, articles, backend, orders, persistLocal, products],
   )
 
   const restockProduct = useCallback(
-    (id: string, qty: number) => {
+    async (id: string, qty: number) => {
       if (qty <= 0) return
-      persistProducts(
+      const current = products.find((p) => p.id === id)
+      if (!current) return
+      if (backend === 'supabase') {
+        const updated = await apiRestockProduct(id, qty, current)
+        setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)))
+        return
+      }
+      persistLocal(
         products.map((p) =>
           p.id === id
             ? { ...p, stockQty: p.stockQty + qty, available: p.stockQty + qty > 0 }
             : p,
         ),
+        orders,
+        articles,
       )
     },
-    [persistProducts, products],
+    [articles, backend, orders, persistLocal, products],
   )
 
   const updateProductStock = useCallback(
-    (id: string, qty: number) => {
+    async (id: string, qty: number) => {
       if (!Number.isFinite(qty) || qty < 0) return
-      persistProducts(
-        products.map((p) =>
-          p.id === id ? { ...p, stockQty: qty, available: qty > 0 } : p,
-        ),
+      if (backend === 'supabase') {
+        const updated = await apiUpdateProductStock(id, qty)
+        setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)))
+        return
+      }
+      persistLocal(
+        products.map((p) => (p.id === id ? { ...p, stockQty: qty, available: qty > 0 } : p)),
+        orders,
+        articles,
       )
     },
-    [persistProducts, products],
+    [articles, backend, orders, persistLocal, products],
   )
 
   const upsertProduct = useCallback(
-    (product: PosProduct) => {
+    async (product: PosProduct) => {
+      if (backend === 'supabase') {
+        const updated = await apiUpsertProduct(product)
+        setProducts((prev) => {
+          const exists = prev.some((p) => p.id === updated.id)
+          return exists
+            ? prev.map((p) => (p.id === updated.id ? updated : p))
+            : [...prev, updated]
+        })
+        return
+      }
       const exists = products.some((p) => p.id === product.id)
       const next = exists
-        ? products.map((p) => (p.id === product.id ? { ...product, available: product.stockQty > 0 } : p))
+        ? products.map((p) =>
+            p.id === product.id ? { ...product, available: product.stockQty > 0 } : p,
+          )
         : [...products, { ...product, available: product.stockQty > 0 }]
-      persistProducts(next)
+      persistLocal(next, orders, articles)
     },
-    [persistProducts, products],
+    [articles, backend, orders, persistLocal, products],
   )
 
   const deleteProduct = useCallback(
-    (id: string) => {
-      persistProducts(products.filter((p) => p.id !== id))
+    async (id: string) => {
+      if (backend === 'supabase') {
+        await apiDeleteProduct(id)
+        setProducts((prev) => prev.filter((p) => p.id !== id))
+        return
+      }
+      persistLocal(
+        products.filter((p) => p.id !== id),
+        orders,
+        articles,
+      )
     },
-    [persistProducts, products],
+    [articles, backend, orders, persistLocal, products],
   )
 
   const toggleReminderDone = useCallback(
-    (orderId: string) => {
-      persistOrders(
-        orders.map((o) =>
-          o.id === orderId
-            ? {
-                ...o,
-                reminderDone: !o.reminderDone,
-                history: [
-                  ...o.history,
-                  {
-                    at: new Date().toISOString(),
-                    by: actor,
-                    text: o.reminderDone ? 'Supplier reminder reopened' : 'Supplier reminder done',
-                  },
-                ],
-              }
-            : o,
-        ),
+    async (orderId: string) => {
+      const order = orders.find((o) => o.id === orderId)
+      if (!order) return
+      await updateOrder(
+        orderId,
+        { reminderDone: !order.reminderDone },
+        order.reminderDone ? 'Supplier reminder reopened' : 'Supplier reminder done',
       )
     },
-    [actor, orders, persistOrders],
+    [orders, updateOrder],
   )
 
   const updateArticle = useCallback(
-    (id: string, patch: Partial<PosArticle>) => {
-      persistArticles(articles.map((a) => (a.id === id ? { ...a, ...patch } : a)))
+    async (id: string, patch: Partial<PosArticle>) => {
+      if (backend === 'supabase') {
+        const updated = await apiUpdateArticle(id, patch)
+        setArticles((prev) => prev.map((a) => (a.id === id ? updated : a)))
+        return
+      }
+      persistLocal(
+        products,
+        orders,
+        articles.map((a) => (a.id === id ? { ...a, ...patch } : a)),
+      )
     },
-    [articles, persistArticles],
+    [articles, backend, orders, persistLocal, products],
   )
 
-  const resetDemo = useCallback(() => {
+  const resetDemo = useCallback(async () => {
+    if (backend === 'supabase') {
+      const snap = await apiResetDemo()
+      setProducts(snap.products)
+      setOrders(snap.orders)
+      setArticles(snap.articles)
+      return
+    }
     clearStorage([KEYS.products, KEYS.orders, KEYS.articles])
-    persistProducts(seedProducts)
-    persistOrders(seedOrders)
-    persistArticles(seedArticles)
-  }, [persistArticles, persistOrders, persistProducts])
+    persistLocal(seedProducts, seedOrders, seedArticles)
+  }, [backend, persistLocal])
 
   const value = useMemo(
     () => ({
       products,
       orders,
       articles,
+      ready,
+      loading,
+      error,
+      backend,
+      refresh,
       createOrder,
       updateOrder,
       setOrderStatus,
@@ -330,10 +430,15 @@ export function PosProvider({ children }: { children: ReactNode }) {
     }),
     [
       articles,
+      backend,
       createOrder,
       deleteProduct,
+      error,
+      loading,
       orders,
       products,
+      ready,
+      refresh,
       resetDemo,
       restockProduct,
       setOrderStatus,

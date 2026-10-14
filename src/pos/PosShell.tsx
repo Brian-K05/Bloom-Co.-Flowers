@@ -37,7 +37,7 @@ const peakStatuses: PosOrderStatus[] = ['pending', 'confirmed', 'preparing', 're
 export function PosShell() {
   const { user, logout } = usePosAuth()
   const { theme, themeId, setTheme } = usePosTheme()
-  const { orders } = usePos()
+  const { orders, loading, error, backend, refresh, ready } = usePos()
   const location = useLocation()
   const [open, setOpen] = useState(false)
   const today = todayISODate()
@@ -274,6 +274,27 @@ export function PosShell() {
             className={`page-enter min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 ${isSplit ? 'max-w-[1400px]' : ''} ${isSoft ? 'sm:px-8' : ''}`}
             key={location.pathname}
           >
+            {loading && !ready ? (
+              <p className="mb-4 text-sm" style={{ color: 'var(--pos-muted)' }}>
+                Loading POS data…
+              </p>
+            ) : null}
+            {error ? (
+              <div
+                className="pos-surface mb-4 flex flex-wrap items-center justify-between gap-3 p-4 text-sm"
+                style={{ borderColor: 'var(--pos-danger)' }}
+              >
+                <p>
+                  Could not load database: {error}. Check Supabase keys / bootstrap SQL, or use local demo mode.
+                </p>
+                <button type="button" className="pos-btn pos-btn-secondary" onClick={() => void refresh()}>
+                  Retry
+                </button>
+              </div>
+            ) : null}
+            <p className="mb-4 text-[11px] uppercase tracking-[0.14em]" style={{ color: 'var(--pos-muted)' }}>
+              Data: {backend === 'supabase' ? 'Supabase' : 'localStorage (set VITE_SUPABASE_* for DB)'}
+            </p>
             <Outlet />
           </main>
         </div>

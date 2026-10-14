@@ -67,8 +67,11 @@ export function PosInventoryPage() {
                             notify('Enter a valid stock quantity')
                             return
                           }
-                          updateProductStock(product.id, qty)
-                          notify(`Stock set for ${product.name}`)
+                          void updateProductStock(product.id, qty)
+                            .then(() => notify(`Stock set for ${product.name}`))
+                            .catch((err: unknown) =>
+                              notify(err instanceof Error ? err.message : 'Could not save stock'),
+                            )
                         }}
                       >
                         Save
@@ -95,9 +98,14 @@ export function PosInventoryPage() {
                             notify('Enter restock quantity')
                             return
                           }
-                          restockProduct(product.id, qty)
-                          setRestockQty((prev) => ({ ...prev, [product.id]: '' }))
-                          notify(`Restocked ${product.name}`)
+                          void restockProduct(product.id, qty)
+                            .then(() => {
+                              setRestockQty((prev) => ({ ...prev, [product.id]: '' }))
+                              notify(`Restocked ${product.name}`)
+                            })
+                            .catch((err: unknown) =>
+                              notify(err instanceof Error ? err.message : 'Could not restock'),
+                            )
                         }}
                       >
                         Add

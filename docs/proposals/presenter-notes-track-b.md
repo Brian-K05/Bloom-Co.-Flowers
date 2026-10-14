@@ -24,4 +24,8 @@ Track B is the ₱30k presentation scope: working desk now. Meta automation is a
 
 ## Reset
 
-Dashboard → **Reset demo** restores seed products, orders, and articles.
+Dashboard → **Reset demo** restores seed products, orders, and articles (Supabase RPC `reset_pos_demo()` when configured; otherwise localStorage).
+
+## Supabase (shared demo DB)
+
+If presenting from a hosted URL with `VITE_SUPABASE_*` set, everyone sees the same database. Run `supabase/bootstrap.sql` once on a fresh project; see `supabase/README.md`.

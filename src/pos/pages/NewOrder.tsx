@@ -39,13 +39,13 @@ export function PosNewOrderPage() {
     [isPreorder, products],
   )
 
-  function onSubmit(event: FormEvent) {
+  async function onSubmit(event: FormEvent) {
     event.preventDefault()
     if (!customerName.trim() || !productId) {
       notify('Customer name and at least one product are required.')
       return
     }
-    const order = createOrder({
+    const order = await createOrder({
       source,
       customerName,
       customerPhone,

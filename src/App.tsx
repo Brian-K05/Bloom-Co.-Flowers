@@ -2,7 +2,6 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { ConceptGalleryPage } from './concepts/ConceptGallery'
 import { ConceptRoutePage } from './concepts/ConceptHome'
 import { ConceptProvider } from './concepts/ConceptProvider'
-import { AdminLayout } from './components/layout/AdminLayout'
 import { Layout } from './components/layout/Layout'
 import { ToastViewport } from './components/ui/ToastViewport'
 import { ShopProvider } from './context/ShopContext'
@@ -20,9 +19,8 @@ import { OrdersPage } from './pages/Orders'
 import { OrderSuccessPage } from './pages/OrderSuccess'
 import { ProductDetailPage } from './pages/ProductDetail'
 import { ShopPage } from './pages/Shop'
-import { AdminDashboardPage } from './pages/admin/Dashboard'
-import { AdminOrdersPage } from './pages/admin/Orders'
-import { AdminProductsPage } from './pages/admin/Products'
+import { AdminRoot } from './pos/AdminRoot'
+import './pos/themes/tokens.css'
 
 export default function App() {
   return (
@@ -31,6 +29,7 @@ export default function App() {
         <ShopProvider>
           <BrowserRouter>
             <Routes>
+              <Route path="/admin/*" element={<AdminRoot />} />
               <Route element={<Layout />}>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/concepts" element={<ConceptGalleryPage />} />
@@ -47,12 +46,6 @@ export default function App() {
                 <Route path="/account" element={<AccountPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
-                <Route path="*" element={<NotFoundPage />} />
-              </Route>
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboardPage />} />
-                <Route path="products" element={<AdminProductsPage />} />
-                <Route path="orders" element={<AdminOrdersPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Route>
             </Routes>

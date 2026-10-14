@@ -1,6 +1,18 @@
 # Flower Shop Online Ordering System — Project Plan
 
-**Client package:** ₱15,000 Starter (Salora Tech Solutions)  
+> **SUPERSEDED (2026-10-15)**  
+> This document describes the old **₱15,000 customer website** package.  
+> The client direction is now **admin-only POS + Messenger ordering** (no public storefront).  
+> **Use instead:**  
+> - [Flower Shop POS + Messenger Proposal](../proposals/flower-shop-pos-messenger-proposal.md)  
+> - [Scope matrix](../proposals/scope-matrix.md)  
+> - [Owner alignment checklist](../proposals/owner-alignment-checklist.md)  
+> - [Website scope parked](../proposals/website-scope-parked.md)  
+> Keep this file for history only. Do not sell or implement this plan for the current client package.
+
+---
+
+**Client package:** ₱15,000 Starter (Salora Tech Solutions) — *historical*  
 **Source:** `PROPOSE_SYSTEM_FLOWER SHOP (1).docx`  
 **Demo brand (until client branding):** Bloom & Co.  
 **Plan date:** 2026-10-10  

@@ -1,5 +1,6 @@
 -- Bloom Desk POS — paste this once in Supabase SQL Editor
 -- Includes: schema, RLS (demo-open), seed data, reset_pos_demo() RPC
+-- Catalog lives in the database. App loads products/orders/articles/locations/options from here.
 
 -- ========== SCHEMA ==========
 create extension if not exists pgcrypto;
@@ -7,6 +8,8 @@ create extension if not exists pgcrypto;
 drop table if exists public.pos_orders cascade;
 drop table if exists public.pos_articles cascade;
 drop table if exists public.pos_products cascade;
+drop table if exists public.pos_locations cascade;
+drop table if exists public.pos_options cascade;
 
 create table public.pos_products (
   id text primary key,
@@ -55,6 +58,21 @@ create table public.pos_articles (
   updated_at timestamptz not null default now()
 );
 
+create table public.pos_locations (
+  id text primary key,
+  label text not null,
+  sort_order integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+create table public.pos_options (
+  id text primary key,
+  kind text not null check (kind in ('ribbon', 'wrapper')),
+  label text not null,
+  sort_order integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
 create index pos_orders_schedule_date_idx on public.pos_orders (schedule_date);
 create index pos_orders_status_idx on public.pos_orders (status);
 create index pos_orders_is_preorder_idx on public.pos_orders (is_preorder);
@@ -62,6 +80,8 @@ create index pos_orders_is_preorder_idx on public.pos_orders (is_preorder);
 alter table public.pos_products enable row level security;
 alter table public.pos_orders enable row level security;
 alter table public.pos_articles enable row level security;
+alter table public.pos_locations enable row level security;
+alter table public.pos_options enable row level security;
 
 drop policy if exists pos_products_demo_all on public.pos_products;
 create policy pos_products_demo_all on public.pos_products
@@ -75,12 +95,22 @@ drop policy if exists pos_articles_demo_all on public.pos_articles;
 create policy pos_articles_demo_all on public.pos_articles
   for all to anon, authenticated using (true) with check (true);
 
+drop policy if exists pos_locations_demo_all on public.pos_locations;
+create policy pos_locations_demo_all on public.pos_locations
+  for all to anon, authenticated using (true) with check (true);
+
+drop policy if exists pos_options_demo_all on public.pos_options;
+create policy pos_options_demo_all on public.pos_options
+  for all to anon, authenticated using (true) with check (true);
+
 grant usage on schema public to anon, authenticated;
 grant all on public.pos_products to anon, authenticated;
 grant all on public.pos_orders to anon, authenticated;
 grant all on public.pos_articles to anon, authenticated;
+grant all on public.pos_locations to anon, authenticated;
+grant all on public.pos_options to anon, authenticated;
 
--- ========== RESET RPC (includes seed body) ==========
+-- ========== RESET RPC (seed body — single source of demo data) ==========
 create or replace function public.reset_pos_demo()
 returns jsonb
 language plpgsql
@@ -88,7 +118,29 @@ security definer
 set search_path = public
 as $$
 begin
-  truncate table public.pos_orders, public.pos_articles, public.pos_products restart identity cascade;
+  truncate table public.pos_orders, public.pos_articles, public.pos_products,
+    public.pos_locations, public.pos_options restart identity cascade;
+
+  insert into public.pos_locations (id, label, sort_order) values
+    ('makati-poblacion', 'Makati – Poblacion', 1),
+    ('san-jose', 'San Jose', 2),
+    ('quezon-city', 'Quezon City', 3),
+    ('pasig', 'Pasig', 4),
+    ('mandaluyong', 'Mandaluyong', 5),
+    ('studio-pickup', 'Studio Pickup', 6);
+
+  insert into public.pos_options (id, kind, label, sort_order) values
+    ('ribbon-pink', 'ribbon', 'Pink', 1),
+    ('ribbon-yellow', 'ribbon', 'Yellow', 2),
+    ('ribbon-red', 'ribbon', 'Red', 3),
+    ('ribbon-ivory', 'ribbon', 'Ivory', 4),
+    ('ribbon-sage', 'ribbon', 'Sage', 5),
+    ('ribbon-gold', 'ribbon', 'Gold', 6),
+    ('wrapper-kraft', 'wrapper', 'Kraft', 1),
+    ('wrapper-ivory', 'wrapper', 'Ivory tissue', 2),
+    ('wrapper-blush', 'wrapper', 'Blush wrap', 3),
+    ('wrapper-cello', 'wrapper', 'Clear cellophane', 4),
+    ('wrapper-black', 'wrapper', 'Black matte', 5);
 
   insert into public.pos_products (id, name, price, category, stock_qty, available, image, is_imported) values
     ('classic-red-roses', 'Classic Red Roses', 1500, 'Roses', 40, true, 'https://images.unsplash.com/photo-1496062031456-07b8f162a322?auto=format&fit=crop&w=1200&q=80', false),

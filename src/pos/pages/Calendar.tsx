@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { useToast } from '../../context/ToastContext'
 import { todayISODate } from '../../lib/format'
 import { StatusBadge } from '../components/StatusBadge'
 import { AddToPhoneCalendar } from '../components/AddToPhoneCalendar'
-import { shareOrDownloadWeekIcs } from '../lib/phoneCalendar'
 import { usePosTheme } from '../PosThemeProvider'
 import { usePos } from '../store/PosContext'
 
@@ -30,7 +28,6 @@ function parseIsoLocal(iso: string) {
 export function PosCalendarPage() {
   const { orders } = usePos()
   const { theme } = usePosTheme()
-  const { notify } = useToast()
   const [searchParams] = useSearchParams()
   const focusDate = searchParams.get('date')
   const [anchor, setAnchor] = useState(() => startOfWeek(focusDate ? parseIsoLocal(focusDate) : new Date()))
@@ -47,13 +44,12 @@ export function PosCalendarPage() {
     })
   }, [anchor])
 
-  const weekOrders = useMemo(() => {
-    const keys = new Set(days.map(toISO))
-    return orders.filter((o) => o.status !== 'cancelled' && keys.has(o.scheduleDate))
-  }, [days, orders])
-
   const scheduled = orders.filter((o) => o.status !== 'cancelled')
   const confirmed = orders.filter((o) => !['pending', 'cancelled'].includes(o.status))
+  const weekOrders = useMemo(() => {
+    const keys = new Set(days.map(toISO))
+    return scheduled.filter((o) => keys.has(o.scheduleDate))
+  }, [days, scheduled])
 
   function shiftWeek(delta: number) {
     const next = new Date(anchor)
@@ -71,7 +67,7 @@ export function PosCalendarPage() {
           <p className="mt-1 text-sm" style={{ color: 'var(--pos-muted)' }}>
             {theme.layout === 'night'
               ? 'Night Shift week strip — scan pickups and deliveries quickly.'
-              : 'Confirmed and active orders by scheduled date. Sync to your phone calendar for reminders.'}
+              : 'Confirmed and active orders by scheduled date. Add each order to Google Calendar for reminders.'}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -83,26 +79,6 @@ export function PosCalendarPage() {
           </button>
           <button type="button" className="pos-btn pos-btn-secondary" onClick={() => shiftWeek(1)}>
             Next week
-          </button>
-          <button
-            type="button"
-            className="pos-btn pos-btn-primary"
-            onClick={() => {
-              void shareOrDownloadWeekIcs(weekOrders, `bloom-desk-week-${toISO(anchor)}.ics`)
-                .then((mode) =>
-                  notify(
-                    mode === 'shared'
-                      ? 'Share to Calendar on your phone to save this week’s schedules'
-                      : 'Downloaded week .ics — open on Android, iPhone, or laptop calendar',
-                  ),
-                )
-                .catch((err: unknown) => {
-                  if (err instanceof DOMException && err.name === 'AbortError') return
-                  notify('Could not export week calendar')
-                })
-            }}
-          >
-            Sync week to phone
           </button>
         </div>
       </div>

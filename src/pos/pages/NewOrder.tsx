@@ -1,15 +1,14 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatPHP, todayISODate } from '../../lib/format'
 import { useToast } from '../../context/ToastContext'
-import { RIBBON_OPTIONS, WRAPPER_OPTIONS, POS_LOCATIONS } from '../seed'
 import { usePosTheme } from '../PosThemeProvider'
 import { usePos } from '../store/PosContext'
 import type { PosFulfillment, PosOrderSource } from '../types'
 import { BloomImage } from '../../components/ui/BloomImage'
 
 export function PosNewOrderPage() {
-  const { products, createOrder } = usePos()
+  const { products, createOrder, locations, ribbons, wrappers, backend } = usePos()
   const { theme } = usePosTheme()
   const { notify } = useToast()
   const navigate = useNavigate()
@@ -19,19 +18,35 @@ export function PosNewOrderPage() {
   const [customerPhone, setCustomerPhone] = useState('')
   const [recipientName, setRecipientName] = useState('')
   const [recipientPhone, setRecipientPhone] = useState('')
-  const [location, setLocation] = useState(POS_LOCATIONS[0])
+  const [location, setLocation] = useState('')
   const [fulfillment, setFulfillment] = useState<PosFulfillment>('delivery')
   const [scheduleDate, setScheduleDate] = useState(todayISODate())
-  const [productId, setProductId] = useState(products.find((p) => p.stockQty > 0)?.id ?? '')
+  const [productId, setProductId] = useState('')
   const [quantity, setQuantity] = useState(1)
-  const [ribbon, setRibbon] = useState(RIBBON_OPTIONS[0])
-  const [wrapper, setWrapper] = useState(WRAPPER_OPTIONS[0])
+  const [ribbon, setRibbon] = useState('')
+  const [wrapper, setWrapper] = useState('')
   const [cardMessage, setCardMessage] = useState('')
   const [addOns, setAddOns] = useState('')
   const [notes, setNotes] = useState('')
   const [isPreorder, setIsPreorder] = useState(false)
   const [supplierNote, setSupplierNote] = useState('')
   const [reminderDue, setReminderDue] = useState(todayISODate())
+
+  useEffect(() => {
+    if (!location && locations[0]) setLocation(locations[0])
+  }, [location, locations])
+  useEffect(() => {
+    if (!ribbon && ribbons[0]) setRibbon(ribbons[0])
+  }, [ribbon, ribbons])
+  useEffect(() => {
+    if (!wrapper && wrappers[0]) setWrapper(wrappers[0])
+  }, [wrapper, wrappers])
+  useEffect(() => {
+    if (!productId) {
+      const first = products.find((p) => p.stockQty > 0)?.id ?? products[0]?.id ?? ''
+      if (first) setProductId(first)
+    }
+  }, [productId, products])
 
   const selected = products.find((p) => p.id === productId)
   const availableProducts = useMemo(
@@ -124,7 +139,7 @@ export function PosNewOrderPage() {
       <label className="pos-label">
         Location
         <select className="pos-field mt-1" value={location} onChange={(e) => setLocation(e.target.value)}>
-          {POS_LOCATIONS.map((loc) => (
+          {locations.map((loc) => (
             <option key={loc} value={loc}>
               {loc}
             </option>
@@ -160,7 +175,7 @@ export function PosNewOrderPage() {
         <label className="pos-label">
           Ribbon
           <select className="pos-field mt-1" value={ribbon} onChange={(e) => setRibbon(e.target.value)}>
-            {RIBBON_OPTIONS.map((o) => (
+            {ribbons.map((o) => (
               <option key={o}>{o}</option>
             ))}
           </select>
@@ -168,7 +183,7 @@ export function PosNewOrderPage() {
         <label className="pos-label">
           Wrapper
           <select className="pos-field mt-1" value={wrapper} onChange={(e) => setWrapper(e.target.value)}>
-            {WRAPPER_OPTIONS.map((o) => (
+            {wrappers.map((o) => (
               <option key={o}>{o}</option>
             ))}
           </select>
@@ -253,12 +268,22 @@ export function PosNewOrderPage() {
     )
   }
 
+  const emptyCatalog =
+    !products.length || !locations.length ? (
+      <p className="mt-4 text-sm" style={{ color: 'var(--pos-danger)' }}>
+        {backend === 'supabase'
+          ? 'No catalog in the database yet. Run supabase/migrate_shop_options.sql (or bootstrap.sql), then Dashboard → Reset demo.'
+          : 'No products loaded. Use Reset demo or configure Supabase.'}
+      </p>
+    ) : null
+
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="text-3xl">New order</h1>
       <p className="mt-2 text-sm" style={{ color: 'var(--pos-muted)' }}>
         Default source is Messenger — confirm details in chat, then save here.
       </p>
+      {emptyCatalog}
       <div className="pos-surface mt-6 p-5 sm:p-6">{form}</div>
     </div>
   )

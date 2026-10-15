@@ -1,7 +1,13 @@
+/**
+ * Offline / localStorage fallback only.
+ * When VITE_SUPABASE_* is set, the live catalog comes from Supabase seeders
+ * (see supabase/bootstrap.sql + reset_pos_demo). Do not treat this file as the shop catalog.
+ */
 import { images } from '../lib/images'
 import { todayISODate } from '../lib/format'
 import type { PosArticle, PosOrder, PosProduct } from './types'
 
+/** @deprecated Prefer usePos().locations from the database */
 export const POS_LOCATIONS = [
   'Makati – Poblacion',
   'San Jose',
@@ -11,7 +17,9 @@ export const POS_LOCATIONS = [
   'Studio Pickup',
 ]
 
+/** @deprecated Prefer usePos().ribbons from the database */
 export const RIBBON_OPTIONS = ['Pink', 'Yellow', 'Red', 'Ivory', 'Sage', 'Gold']
+/** @deprecated Prefer usePos().wrappers from the database */
 export const WRAPPER_OPTIONS = ['Kraft', 'Ivory tissue', 'Blush wrap', 'Clear cellophane', 'Black matte']
 
 export const seedProducts: PosProduct[] = [

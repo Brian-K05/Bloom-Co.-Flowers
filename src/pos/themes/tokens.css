@@ -237,6 +237,13 @@ html[data-pos-theme='studio-grid'] {
   box-shadow: 0 10px 28px color-mix(in oklab, var(--pos-ink) 18%, transparent);
 }
 
+/* .pos-btn sets display:inline-flex and would keep the FAB visible on desktop */
+@media (min-width: 640px) {
+  .pos-fab {
+    display: none !important;
+  }
+}
+
 @keyframes posDrawer {
   from {
     transform: translateX(-12px);

@@ -3,14 +3,13 @@ import { Link } from 'react-router-dom'
 import { formatPHP } from '../../lib/format'
 import { usePosTheme } from '../PosThemeProvider'
 import { StatusBadge, statusLabel } from '../components/StatusBadge'
-import { POS_LOCATIONS } from '../seed'
 import { usePos } from '../store/PosContext'
 import type { PosOrderSource, PosOrderStatus } from '../types'
 
 const boardColumns: PosOrderStatus[] = ['pending', 'confirmed', 'preparing', 'ready_out', 'completed']
 
 export function PosOrdersPage() {
-  const { orders, getProduct } = usePos()
+  const { orders, getProduct, locations } = usePos()
   const { theme } = usePosTheme()
   const [date, setDate] = useState('')
   const [location, setLocation] = useState('all')
@@ -38,7 +37,7 @@ export function PosOrdersPage() {
         Location
         <select className="pos-field mt-1" value={location} onChange={(e) => setLocation(e.target.value)}>
           <option value="all">All</option>
-          {POS_LOCATIONS.map((loc) => (
+          {locations.map((loc) => (
             <option key={loc} value={loc}>
               {loc}
             </option>
@@ -89,18 +88,13 @@ export function PosOrdersPage() {
               : 'Filter by date, location, status, or source for peak-day prep.'}
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className="pos-btn pos-btn-secondary sm:hidden"
-            onClick={() => setFiltersOpen((v) => !v)}
-          >
-            Filters
-          </button>
-          <Link to="/admin/orders/new" className="pos-btn pos-btn-primary hidden sm:inline-flex">
-            + New order
-          </Link>
-        </div>
+        <button
+          type="button"
+          className="pos-btn pos-btn-secondary sm:hidden"
+          onClick={() => setFiltersOpen((v) => !v)}
+        >
+          Filters
+        </button>
       </div>
 
       <div className={`pos-surface mt-6 p-4 ${filtersOpen ? 'block' : 'hidden sm:block'}`}>{filters}</div>

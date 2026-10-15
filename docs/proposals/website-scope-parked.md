@@ -10,7 +10,7 @@
 
 | Item | Previous context | Now |
 |------|------------------|-----|
-| ₱15,000 Starter customer website | [docs/plans/flower-shop-system-plan.md](../plans/flower-shop-system-plan.md) | **Not sold** to this client |
+| ₱15,000 Starter customer website | Word file `PROPOSE_SYSTEM_FLOWER SHOP (1).docx` + [flower-shop-system-plan.md](../plans/flower-shop-system-plan.md) | **Not sold** — superseded by Track B POS proposal |
 | Customer signup / cart / checkout | Old proposal | **Out of scope** |
 | Public homepage / shop / product pages | Bloom & Co. demo | **Not the product** |
 | 10 design concepts / theme gallery | Sales / portfolio demo in repo | **Internal / portfolio only** |

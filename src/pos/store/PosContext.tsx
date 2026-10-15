@@ -22,7 +22,7 @@ import {
   fetchPosSnapshot,
 } from '../api/posApi'
 import { usePosAuth } from '../auth/PosAuthContext'
-import { seedArticles, seedOrders, seedProducts } from '../seed'
+import { POS_LOCATIONS, RIBBON_OPTIONS, WRAPPER_OPTIONS, seedArticles, seedOrders, seedProducts } from '../seed'
 import type {
   PosArticle,
   PosOrder,
@@ -35,12 +35,19 @@ const KEYS = {
   products: 'bloomco.pos.products',
   orders: 'bloomco.pos.orders',
   articles: 'bloomco.pos.articles',
+  locations: 'bloomco.pos.locations',
+  ribbons: 'bloomco.pos.ribbons',
+  wrappers: 'bloomco.pos.wrappers',
 }
 
 type PosContextValue = {
   products: PosProduct[]
   orders: PosOrder[]
   articles: PosArticle[]
+  /** Delivery / pickup labels from DB (or local seed fallback) */
+  locations: string[]
+  ribbons: string[]
+  wrappers: string[]
   ready: boolean
   loading: boolean
   error: string | null
@@ -100,6 +107,9 @@ export function PosProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<PosProduct[]>([])
   const [orders, setOrders] = useState<PosOrder[]>([])
   const [articles, setArticles] = useState<PosArticle[]>([])
+  const [locations, setLocations] = useState<string[]>([])
+  const [ribbons, setRibbons] = useState<string[]>([])
+  const [wrappers, setWrappers] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [ready, setReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -118,6 +128,15 @@ export function PosProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const applyShopOptions = useCallback((locs: string[], rib: string[], wrap: string[]) => {
+    setLocations(locs)
+    setRibbons(rib)
+    setWrappers(wrap)
+    writeStorage(KEYS.locations, locs)
+    writeStorage(KEYS.ribbons, rib)
+    writeStorage(KEYS.wrappers, wrap)
+  }, [])
+
   const refresh = useCallback(async () => {
     setLoading(true)
     setError(null)
@@ -127,10 +146,17 @@ export function PosProvider({ children }: { children: ReactNode }) {
         setProducts(snap.products)
         setOrders(snap.orders)
         setArticles(snap.articles)
+        // Prefer DB rows; if migrate SQL not run yet, keep empty so UI prompts seed — do not silently hardcode catalog
+        applyShopOptions(snap.locations, snap.ribbons, snap.wrappers)
       } else {
         setProducts(readStorage(KEYS.products, seedProducts))
         setOrders(readStorage(KEYS.orders, seedOrders))
         setArticles(readStorage(KEYS.articles, seedArticles))
+        applyShopOptions(
+          readStorage(KEYS.locations, POS_LOCATIONS),
+          readStorage(KEYS.ribbons, RIBBON_OPTIONS),
+          readStorage(KEYS.wrappers, WRAPPER_OPTIONS),
+        )
       }
       setReady(true)
     } catch (err) {
@@ -140,7 +166,7 @@ export function PosProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }, [backend])
+  }, [applyShopOptions, backend])
 
   useEffect(() => {
     void refresh()
@@ -399,17 +425,22 @@ export function PosProvider({ children }: { children: ReactNode }) {
       setProducts(snap.products)
       setOrders(snap.orders)
       setArticles(snap.articles)
+      applyShopOptions(snap.locations, snap.ribbons, snap.wrappers)
       return
     }
-    clearStorage([KEYS.products, KEYS.orders, KEYS.articles])
+    clearStorage([KEYS.products, KEYS.orders, KEYS.articles, KEYS.locations, KEYS.ribbons, KEYS.wrappers])
     persistLocal(seedProducts, seedOrders, seedArticles)
-  }, [backend, persistLocal])
+    applyShopOptions(POS_LOCATIONS, RIBBON_OPTIONS, WRAPPER_OPTIONS)
+  }, [applyShopOptions, backend, persistLocal])
 
   const value = useMemo(
     () => ({
       products,
       orders,
       articles,
+      locations,
+      ribbons,
+      wrappers,
       ready,
       loading,
       error,
@@ -435,18 +466,21 @@ export function PosProvider({ children }: { children: ReactNode }) {
       deleteProduct,
       error,
       loading,
+      locations,
       orders,
       products,
       ready,
       refresh,
       resetDemo,
       restockProduct,
+      ribbons,
       setOrderStatus,
       toggleReminderDone,
       updateArticle,
       updateOrder,
       updateProductStock,
       upsertProduct,
+      wrappers,
     ],
   )
 

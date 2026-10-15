@@ -1,5 +1,60 @@
--- RPC: truncate POS tables and re-seed demo data (Dashboard → Reset demo)
+-- Run once on an existing Bloom Desk Supabase project (after bootstrap).
+-- Adds shop locations + ribbon/wrapper options so the POS is not hardcoded in the app.
+-- Safe to re-run: uses IF NOT EXISTS / upserts.
 
+create table if not exists public.pos_locations (
+  id text primary key,
+  label text not null,
+  sort_order integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.pos_options (
+  id text primary key,
+  kind text not null check (kind in ('ribbon', 'wrapper')),
+  label text not null,
+  sort_order integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.pos_locations enable row level security;
+alter table public.pos_options enable row level security;
+
+drop policy if exists pos_locations_demo_all on public.pos_locations;
+create policy pos_locations_demo_all on public.pos_locations
+  for all to anon, authenticated using (true) with check (true);
+
+drop policy if exists pos_options_demo_all on public.pos_options;
+create policy pos_options_demo_all on public.pos_options
+  for all to anon, authenticated using (true) with check (true);
+
+grant all on public.pos_locations to anon, authenticated;
+grant all on public.pos_options to anon, authenticated;
+
+insert into public.pos_locations (id, label, sort_order) values
+  ('makati-poblacion', 'Makati – Poblacion', 1),
+  ('san-jose', 'San Jose', 2),
+  ('quezon-city', 'Quezon City', 3),
+  ('pasig', 'Pasig', 4),
+  ('mandaluyong', 'Mandaluyong', 5),
+  ('studio-pickup', 'Studio Pickup', 6)
+on conflict (id) do update set label = excluded.label, sort_order = excluded.sort_order;
+
+insert into public.pos_options (id, kind, label, sort_order) values
+  ('ribbon-pink', 'ribbon', 'Pink', 1),
+  ('ribbon-yellow', 'ribbon', 'Yellow', 2),
+  ('ribbon-red', 'ribbon', 'Red', 3),
+  ('ribbon-ivory', 'ribbon', 'Ivory', 4),
+  ('ribbon-sage', 'ribbon', 'Sage', 5),
+  ('ribbon-gold', 'ribbon', 'Gold', 6),
+  ('wrapper-kraft', 'wrapper', 'Kraft', 1),
+  ('wrapper-ivory', 'wrapper', 'Ivory tissue', 2),
+  ('wrapper-blush', 'wrapper', 'Blush wrap', 3),
+  ('wrapper-cello', 'wrapper', 'Clear cellophane', 4),
+  ('wrapper-black', 'wrapper', 'Black matte', 5)
+on conflict (id) do update set label = excluded.label, kind = excluded.kind, sort_order = excluded.sort_order;
+
+-- Replace reset RPC so Dashboard → Reset demo also reseeds locations/options
 create or replace function public.reset_pos_demo()
 returns jsonb
 language plpgsql
@@ -7,7 +62,29 @@ security definer
 set search_path = public
 as $$
 begin
-  truncate table public.pos_orders, public.pos_articles, public.pos_products restart identity cascade;
+  truncate table public.pos_orders, public.pos_articles, public.pos_products,
+    public.pos_locations, public.pos_options restart identity cascade;
+
+  insert into public.pos_locations (id, label, sort_order) values
+    ('makati-poblacion', 'Makati – Poblacion', 1),
+    ('san-jose', 'San Jose', 2),
+    ('quezon-city', 'Quezon City', 3),
+    ('pasig', 'Pasig', 4),
+    ('mandaluyong', 'Mandaluyong', 5),
+    ('studio-pickup', 'Studio Pickup', 6);
+
+  insert into public.pos_options (id, kind, label, sort_order) values
+    ('ribbon-pink', 'ribbon', 'Pink', 1),
+    ('ribbon-yellow', 'ribbon', 'Yellow', 2),
+    ('ribbon-red', 'ribbon', 'Red', 3),
+    ('ribbon-ivory', 'ribbon', 'Ivory', 4),
+    ('ribbon-sage', 'ribbon', 'Sage', 5),
+    ('ribbon-gold', 'ribbon', 'Gold', 6),
+    ('wrapper-kraft', 'wrapper', 'Kraft', 1),
+    ('wrapper-ivory', 'wrapper', 'Ivory tissue', 2),
+    ('wrapper-blush', 'wrapper', 'Blush wrap', 3),
+    ('wrapper-cello', 'wrapper', 'Clear cellophane', 4),
+    ('wrapper-black', 'wrapper', 'Black matte', 5);
 
   insert into public.pos_products (id, name, price, category, stock_qty, available, image, is_imported) values
     ('classic-red-roses', 'Classic Red Roses', 1500, 'Roses', 40, true, 'https://images.unsplash.com/photo-1496062031456-07b8f162a322?auto=format&fit=crop&w=1200&q=80', false),

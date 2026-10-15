@@ -37,12 +37,21 @@ const peakStatuses: PosOrderStatus[] = ['pending', 'confirmed', 'preparing', 're
 export function PosShell() {
   const { user, logout } = usePosAuth()
   const { theme, themeId, setTheme } = usePosTheme()
-  const { orders, loading, error, backend, refresh, ready } = usePos()
+  const { orders, products, loading, error, backend, refresh, ready } = usePos()
   const location = useLocation()
   const [open, setOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const today = todayISODate()
   const onNewOrder = location.pathname.startsWith('/admin/orders/new')
   const lightRail = themeId === 'counter-clear' || themeId === 'bloom-ledger' || themeId === 'studio-grid'
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)')
+    const sync = () => setIsMobile(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
 
   useEffect(() => {
     setOpen(false)
@@ -293,17 +302,28 @@ export function PosShell() {
               </div>
             ) : null}
             <p className="mb-4 text-[11px] uppercase tracking-[0.14em]" style={{ color: 'var(--pos-muted)' }}>
-              Data: {backend === 'supabase' ? 'Supabase' : 'localStorage (set VITE_SUPABASE_* for DB)'}
+              Data: {backend === 'supabase' ? 'Supabase (seeded catalog)' : 'localStorage fallback — set VITE_SUPABASE_* for live DB'}
             </p>
+            {backend === 'supabase' && ready && !loading && products.length === 0 ? (
+              <div
+                className="pos-surface mb-4 p-4 text-sm"
+                style={{ borderColor: 'var(--pos-danger)' }}
+              >
+                Database is connected but has no products. Run{' '}
+                <code className="pos-mono text-xs">supabase/migrate_shop_options.sql</code> (or full{' '}
+                <code className="pos-mono text-xs">bootstrap.sql</code>), then use <strong>Reset demo</strong> on the
+                dashboard.
+              </div>
+            ) : null}
             <Outlet />
           </main>
         </div>
       </div>
 
-      {!onNewOrder ? (
+      {!onNewOrder && isMobile ? (
         <Link
           to="/admin/orders/new"
-          className="pos-btn pos-btn-primary pos-fab sm:hidden"
+          className="pos-btn pos-btn-primary pos-fab"
           aria-label="New order"
           data-testid="pos-fab-new-order"
         >

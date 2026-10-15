@@ -51,8 +51,8 @@ test.describe('Track B POS', () => {
     await expect(page.getByText(/Playwright Customer/i)).toBeVisible()
     await expect(page.getByText(/Stock applied:\s*No/i)).toBeVisible()
     await expect(page.getByRole('link', { name: /google calendar/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /outlook/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /apple|samsung|\.ics/i })).toBeVisible()
+    await expect(page.getByRole('link', { name: /outlook/i })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /apple|samsung|\.ics/i })).toHaveCount(0)
 
     await page.getByRole('button', { name: /^confirmed$/i }).click()
     await expect(page).toHaveURL(/\/admin\/calendar/)
@@ -86,8 +86,7 @@ test.describe('Track B POS', () => {
     await page.getByRole('navigation').getByRole('link', { name: /calendar/i }).click()
     await expect(page.getByRole('heading', { name: /calendar/i })).toBeVisible()
     await expect(page.getByRole('button', { name: /this week/i })).toBeVisible()
-    await expect(page.getByRole('button', { name: /sync week to phone/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /^google$/i }).first()).toBeVisible()
+    await expect(page.getByRole('link', { name: /google calendar/i }).first()).toBeVisible()
   })
 
   test('theme switch updates shell layout', async ({ page }) => {
@@ -114,5 +113,25 @@ test.describe('Track B POS', () => {
     await page.getByTestId('pos-mobile-drawer').getByRole('link', { name: /^inventory$/i }).click()
     await expect(page.getByRole('heading', { name: /inventory/i })).toBeVisible()
     await expect(page.getByTestId('pos-fab-new-order')).toBeVisible()
+  })
+
+  test('desktop hides FAB and inventory has product CRUD controls', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await login(page)
+    await page.getByRole('navigation').getByRole('link', { name: /^inventory$/i }).click()
+    await expect(page.getByRole('heading', { name: /inventory/i })).toBeVisible()
+    await expect(page.getByTestId('pos-fab-new-order')).toBeHidden()
+
+    await page.getByTestId('pos-add-product').click()
+    await expect(page.getByTestId('pos-product-form')).toBeVisible()
+    await expect(page.getByTestId('pos-product-save')).toHaveText(/create product/i)
+    await page.getByTestId('pos-product-form').getByRole('button', { name: /^cancel$/i }).click()
+
+    const firstCard = page.locator('article[data-testid^="pos-product-card-"]').first()
+    await expect(firstCard.getByRole('button', { name: /^edit$/i })).toBeVisible()
+    await expect(firstCard.getByRole('button', { name: /^delete$/i })).toBeVisible()
+    await firstCard.getByRole('button', { name: /^edit$/i }).click()
+    await expect(page.getByTestId('pos-product-form')).toBeVisible()
+    await expect(page.getByTestId('pos-product-save')).toHaveText(/update product/i)
   })
 })

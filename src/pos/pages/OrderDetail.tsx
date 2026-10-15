@@ -4,7 +4,6 @@ import { useToast } from '../../context/ToastContext'
 import { formatDateTime, formatPHP } from '../../lib/format'
 import { AddToPhoneCalendar } from '../components/AddToPhoneCalendar'
 import { StatusBadge, statusLabel } from '../components/StatusBadge'
-import { RIBBON_OPTIONS, WRAPPER_OPTIONS } from '../seed'
 import { usePos } from '../store/PosContext'
 import type { PosOrder, PosOrderStatus } from '../types'
 
@@ -37,12 +36,18 @@ export function PosOrderDetailPage() {
 }
 
 function OrderDetailView({ order }: { order: PosOrder }) {
-  const { setOrderStatus, updateOrder } = usePos()
+  const { setOrderStatus, updateOrder, ribbons, wrappers } = usePos()
   const { notify } = useToast()
   const navigate = useNavigate()
   const [ribbon, setRibbon] = useState(order.customization.ribbon)
   const [wrapper, setWrapper] = useState(order.customization.wrapper)
   const [cardMessage, setCardMessage] = useState(order.customization.cardMessage)
+  const ribbonChoices = ribbons.includes(order.customization.ribbon)
+    ? ribbons
+    : [order.customization.ribbon, ...ribbons].filter(Boolean)
+  const wrapperChoices = wrappers.includes(order.customization.wrapper)
+    ? wrappers
+    : [order.customization.wrapper, ...wrappers].filter(Boolean)
 
   function goToCalendar() {
     navigate(`/admin/calendar?date=${order.scheduleDate}`)
@@ -138,7 +143,7 @@ function OrderDetailView({ order }: { order: PosOrder }) {
             <label className="pos-label">
               Ribbon
               <select className="pos-field mt-1" value={ribbon} onChange={(e) => setRibbon(e.target.value)}>
-                {RIBBON_OPTIONS.map((o) => (
+                {ribbonChoices.map((o) => (
                   <option key={o}>{o}</option>
                 ))}
               </select>
@@ -146,7 +151,7 @@ function OrderDetailView({ order }: { order: PosOrder }) {
             <label className="pos-label">
               Wrapper
               <select className="pos-field mt-1" value={wrapper} onChange={(e) => setWrapper(e.target.value)}>
-                {WRAPPER_OPTIONS.map((o) => (
+                {wrapperChoices.map((o) => (
                   <option key={o}>{o}</option>
                 ))}
               </select>

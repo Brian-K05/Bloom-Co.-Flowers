@@ -43,24 +43,19 @@ export function PosDashboardPage() {
             Encode Messenger orders here so stock, calendar, and prep stay in sync.
           </p>
         </div>
-        <div className="hidden flex-wrap gap-2 sm:flex">
-          <Link to="/admin/orders/new" className="pos-btn pos-btn-primary">
-            + New order
-          </Link>
-          <button
-            type="button"
-            className="pos-btn pos-btn-secondary"
-            onClick={() => {
-              void resetDemo()
-                .then(() => notify(backend === 'supabase' ? 'Supabase demo data reset' : 'Local demo data reset'))
-                .catch((err: unknown) =>
-                  notify(err instanceof Error ? err.message : 'Reset failed'),
-                )
-            }}
-          >
-            Reset demo
-          </button>
-        </div>
+        <button
+          type="button"
+          className="pos-btn pos-btn-secondary hidden sm:inline-flex"
+          onClick={() => {
+            void resetDemo()
+              .then(() => notify(backend === 'supabase' ? 'Supabase demo data reset' : 'Local demo data reset'))
+              .catch((err: unknown) =>
+                notify(err instanceof Error ? err.message : 'Reset failed'),
+              )
+          }}
+        >
+          Reset demo
+        </button>
       </div>
 
       <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

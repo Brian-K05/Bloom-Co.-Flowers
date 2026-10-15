@@ -17,24 +17,51 @@ function nextPosId(orders: PosOrder[]) {
   return `POS-${next}`
 }
 
-export async function fetchPosSnapshot(): Promise<{
+export type PosShopOptions = {
+  locations: string[]
+  ribbons: string[]
+  wrappers: string[]
+}
+
+export type PosSnapshot = {
   products: PosProduct[]
   orders: PosOrder[]
   articles: PosArticle[]
-}> {
+  locations: string[]
+  ribbons: string[]
+  wrappers: string[]
+}
+
+type DbLocation = { id: string; label: string; sort_order: number }
+type DbOption = { id: string; kind: string; label: string; sort_order: number }
+
+export async function fetchPosSnapshot(): Promise<PosSnapshot> {
   const sb = getSupabase()
-  const [productsRes, ordersRes, articlesRes] = await Promise.all([
+  const [productsRes, ordersRes, articlesRes, locationsRes, optionsRes] = await Promise.all([
     sb.from('pos_products').select('*').order('name'),
     sb.from('pos_orders').select('*').order('created_at', { ascending: false }),
     sb.from('pos_articles').select('*').order('title'),
+    sb.from('pos_locations').select('id,label,sort_order').order('sort_order'),
+    sb.from('pos_options').select('id,kind,label,sort_order').order('sort_order'),
   ])
   if (productsRes.error) throw productsRes.error
   if (ordersRes.error) throw ordersRes.error
   if (articlesRes.error) throw articlesRes.error
+  // Older projects may not have run migrate_shop_options.sql yet
+  const locations =
+    locationsRes.error || !locationsRes.data
+      ? []
+      : (locationsRes.data as DbLocation[]).map((r) => r.label)
+  const options = optionsRes.error || !optionsRes.data ? [] : (optionsRes.data as DbOption[])
+  const ribbons = options.filter((o) => o.kind === 'ribbon').map((o) => o.label)
+  const wrappers = options.filter((o) => o.kind === 'wrapper').map((o) => o.label)
   return {
     products: (productsRes.data as DbProduct[]).map(mapProduct),
     orders: (ordersRes.data as DbOrder[]).map(mapOrder),
     articles: (articlesRes.data as DbArticle[]).map(mapArticle),
+    locations,
+    ribbons,
+    wrappers,
   }
 }
 
@@ -264,11 +291,7 @@ export async function apiUpdateArticle(id: string, patch: Partial<PosArticle>): 
   return mapArticle(data as DbArticle)
 }
 
-export async function apiResetDemo(): Promise<{
-  products: PosProduct[]
-  orders: PosOrder[]
-  articles: PosArticle[]
-}> {
+export async function apiResetDemo(): Promise<PosSnapshot> {
   const { error } = await getSupabase().rpc('reset_pos_demo')
   if (error) throw error
   return fetchPosSnapshot()

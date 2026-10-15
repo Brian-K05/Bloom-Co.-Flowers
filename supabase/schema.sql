@@ -6,6 +6,8 @@ create extension if not exists pgcrypto;
 drop table if exists public.pos_orders cascade;
 drop table if exists public.pos_articles cascade;
 drop table if exists public.pos_products cascade;
+drop table if exists public.pos_locations cascade;
+drop table if exists public.pos_options cascade;
 
 create table public.pos_products (
   id text primary key,
@@ -54,6 +56,21 @@ create table public.pos_articles (
   updated_at timestamptz not null default now()
 );
 
+create table public.pos_locations (
+  id text primary key,
+  label text not null,
+  sort_order integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+create table public.pos_options (
+  id text primary key,
+  kind text not null check (kind in ('ribbon', 'wrapper')),
+  label text not null,
+  sort_order integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
 create index pos_orders_schedule_date_idx on public.pos_orders (schedule_date);
 create index pos_orders_status_idx on public.pos_orders (status);
 create index pos_orders_is_preorder_idx on public.pos_orders (is_preorder);
@@ -61,6 +78,8 @@ create index pos_orders_is_preorder_idx on public.pos_orders (is_preorder);
 alter table public.pos_products enable row level security;
 alter table public.pos_orders enable row level security;
 alter table public.pos_articles enable row level security;
+alter table public.pos_locations enable row level security;
+alter table public.pos_options enable row level security;
 
 -- Presentation demo: open policies for anon + authenticated
 drop policy if exists pos_products_demo_all on public.pos_products;
@@ -75,7 +94,17 @@ drop policy if exists pos_articles_demo_all on public.pos_articles;
 create policy pos_articles_demo_all on public.pos_articles
   for all to anon, authenticated using (true) with check (true);
 
+drop policy if exists pos_locations_demo_all on public.pos_locations;
+create policy pos_locations_demo_all on public.pos_locations
+  for all to anon, authenticated using (true) with check (true);
+
+drop policy if exists pos_options_demo_all on public.pos_options;
+create policy pos_options_demo_all on public.pos_options
+  for all to anon, authenticated using (true) with check (true);
+
 grant usage on schema public to anon, authenticated;
 grant all on public.pos_products to anon, authenticated;
 grant all on public.pos_orders to anon, authenticated;
 grant all on public.pos_articles to anon, authenticated;
+grant all on public.pos_locations to anon, authenticated;
+grant all on public.pos_options to anon, authenticated;

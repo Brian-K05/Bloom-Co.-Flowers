@@ -5,8 +5,8 @@
 ## Story in 90 seconds
 
 1. **Owner problem:** Most orders arrive on Messenger. Staff need one desk to encode them so stock, calendar, and prep stay accurate.
-2. **What we built (Track B):** Admin-only POS — New Order, status flow, stock deduct on Confirm, calendar, pre-order supplier reminders, flower reference, five switchable UI concepts.
-3. **What we did not build yet:** Customer website as the product, Meta webhooks, AI bot, payment gateway. Those are **Phase 2 / Track A** on the same data model.
+2. **What we built (Track B):** Admin-only POS on **Supabase** — product CRUD, New Order, status flow, stock deduct on Confirm, calendar + Google Calendar, pre-order reminders, flower reference, five UI themes. Demo catalog comes from SQL **seeders** (`reset_pos_demo`), not a hardcoded product list in the app.
+3. **What we did not build:** Customer website (old ₱15k Word proposal), Meta webhooks, AI bot, payment gateway. Those are **Phase 2 / Track A**.
 
 ## Live demo path
 

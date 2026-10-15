@@ -133,7 +133,7 @@ export function PosShell() {
         }`}
       >
         <aside
-          className={`pos-rail-border hidden lg:flex lg:flex-col ${lightRail ? 'border-r' : ''}`}
+          className={`pos-rail-border sticky top-0 hidden h-svh self-start overflow-y-auto lg:flex lg:flex-col ${lightRail ? 'border-r' : ''}`}
           style={{
             background: 'var(--pos-rail)',
             color: 'var(--pos-rail-ink)',

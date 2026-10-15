@@ -1,8 +1,11 @@
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { useToast } from '../../context/ToastContext'
 import { todayISODate } from '../../lib/format'
-import { usePosTheme } from '../PosThemeProvider'
 import { StatusBadge } from '../components/StatusBadge'
+import { AddToPhoneCalendar } from '../components/AddToPhoneCalendar'
+import { shareOrDownloadWeekIcs } from '../lib/phoneCalendar'
+import { usePosTheme } from '../PosThemeProvider'
 import { usePos } from '../store/PosContext'
 
 function startOfWeek(date: Date) {
@@ -19,10 +22,22 @@ function toISO(date: Date) {
   return new Date(date.getTime() - offset * 60_000).toISOString().slice(0, 10)
 }
 
+function parseIsoLocal(iso: string) {
+  const [y, m, d] = iso.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
 export function PosCalendarPage() {
   const { orders } = usePos()
   const { theme } = usePosTheme()
-  const [anchor, setAnchor] = useState(() => startOfWeek(new Date()))
+  const { notify } = useToast()
+  const [searchParams] = useSearchParams()
+  const focusDate = searchParams.get('date')
+  const [anchor, setAnchor] = useState(() => startOfWeek(focusDate ? parseIsoLocal(focusDate) : new Date()))
+
+  useEffect(() => {
+    if (focusDate) setAnchor(startOfWeek(parseIsoLocal(focusDate)))
+  }, [focusDate])
 
   const days = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
@@ -31,6 +46,11 @@ export function PosCalendarPage() {
       return d
     })
   }, [anchor])
+
+  const weekOrders = useMemo(() => {
+    const keys = new Set(days.map(toISO))
+    return orders.filter((o) => o.status !== 'cancelled' && keys.has(o.scheduleDate))
+  }, [days, orders])
 
   const scheduled = orders.filter((o) => o.status !== 'cancelled')
   const confirmed = orders.filter((o) => !['pending', 'cancelled'].includes(o.status))
@@ -51,10 +71,10 @@ export function PosCalendarPage() {
           <p className="mt-1 text-sm" style={{ color: 'var(--pos-muted)' }}>
             {theme.layout === 'night'
               ? 'Night Shift week strip — scan pickups and deliveries quickly.'
-              : 'Confirmed and active orders by scheduled date.'}
+              : 'Confirmed and active orders by scheduled date. Sync to your phone calendar for reminders.'}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button type="button" className="pos-btn pos-btn-secondary" onClick={() => shiftWeek(-1)}>
             Prev week
           </button>
@@ -64,6 +84,26 @@ export function PosCalendarPage() {
           <button type="button" className="pos-btn pos-btn-secondary" onClick={() => shiftWeek(1)}>
             Next week
           </button>
+          <button
+            type="button"
+            className="pos-btn pos-btn-primary"
+            onClick={() => {
+              void shareOrDownloadWeekIcs(weekOrders, `bloom-desk-week-${toISO(anchor)}.ics`)
+                .then((mode) =>
+                  notify(
+                    mode === 'shared'
+                      ? 'Share to Calendar on your phone to save this week’s schedules'
+                      : 'Downloaded week .ics — open on Android, iPhone, or laptop calendar',
+                  ),
+                )
+                .catch((err: unknown) => {
+                  if (err instanceof DOMException && err.name === 'AbortError') return
+                  notify('Could not export week calendar')
+                })
+            }}
+          >
+            Sync week to phone
+          </button>
         </div>
       </div>
 
@@ -72,11 +112,17 @@ export function PosCalendarPage() {
           const iso = toISO(day)
           const dayOrders = scheduled.filter((o) => o.scheduleDate === iso)
           const isToday = iso === today
+          const isFocus = focusDate === iso
           return (
             <div
               key={iso}
+              id={`cal-day-${iso}`}
               className="pos-surface min-h-40 p-3"
-              style={isToday ? { outline: '2px solid var(--pos-accent)' } : undefined}
+              style={
+                isFocus || isToday
+                  ? { outline: `2px solid ${isFocus ? 'var(--pos-accent)' : 'var(--pos-line)'}` }
+                  : undefined
+              }
             >
               <p className="text-[11px] uppercase tracking-[0.14em]" style={{ color: 'var(--pos-muted)' }}>
                 {day.toLocaleDateString('en-PH', { weekday: 'short' })}
@@ -85,20 +131,22 @@ export function PosCalendarPage() {
               <ul className="mt-3 space-y-2">
                 {dayOrders.map((order) => (
                   <li key={order.id}>
-                    <Link
-                      to={`/admin/orders/${order.id}`}
-                      className="block rounded-[calc(var(--pos-radius)*0.6)] border p-2 text-xs hover:border-[var(--pos-accent)]"
+                    <div
+                      className="rounded-[calc(var(--pos-radius)*0.6)] border p-2 text-xs"
                       style={{ borderColor: 'var(--pos-line)' }}
                     >
-                      <span className="pos-mono">{order.id.replace('POS-', '')}</span>
-                      <p className="mt-1 font-medium">{order.customerName}</p>
-                      <p style={{ color: 'var(--pos-muted)' }}>
-                        {order.fulfillment} · {order.location}
-                      </p>
+                      <Link to={`/admin/orders/${order.id}`} className="block hover:underline">
+                        <span className="pos-mono">{order.id.replace('POS-', '')}</span>
+                        <p className="mt-1 font-medium">{order.customerName}</p>
+                        <p style={{ color: 'var(--pos-muted)' }}>
+                          {order.fulfillment} · {order.location}
+                        </p>
+                      </Link>
                       <div className="mt-1">
                         <StatusBadge status={order.status} />
                       </div>
-                    </Link>
+                      <AddToPhoneCalendar order={order} compact />
+                    </div>
                   </li>
                 ))}
                 {!dayOrders.length ? (
@@ -113,7 +161,7 @@ export function PosCalendarPage() {
       </div>
 
       <p className="mt-4 text-xs" style={{ color: 'var(--pos-muted)' }}>
-        Active scheduled: {scheduled.length} · Post-confirm focus: {confirmed.length}
+        Active scheduled: {scheduled.length} · Post-confirm focus: {confirmed.length} · This week: {weekOrders.length}
       </p>
     </div>
   )

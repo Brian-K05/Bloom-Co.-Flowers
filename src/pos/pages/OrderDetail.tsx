@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useToast } from '../../context/ToastContext'
 import { formatDateTime, formatPHP } from '../../lib/format'
+import { AddToPhoneCalendar } from '../components/AddToPhoneCalendar'
 import { StatusBadge, statusLabel } from '../components/StatusBadge'
 import { RIBBON_OPTIONS, WRAPPER_OPTIONS } from '../seed'
 import { usePos } from '../store/PosContext'
@@ -38,14 +39,23 @@ export function PosOrderDetailPage() {
 function OrderDetailView({ order }: { order: PosOrder }) {
   const { setOrderStatus, updateOrder } = usePos()
   const { notify } = useToast()
+  const navigate = useNavigate()
   const [ribbon, setRibbon] = useState(order.customization.ribbon)
   const [wrapper, setWrapper] = useState(order.customization.wrapper)
   const [cardMessage, setCardMessage] = useState(order.customization.cardMessage)
 
+  function goToCalendar() {
+    navigate(`/admin/calendar?date=${order.scheduleDate}`)
+  }
+
   async function changeStatus(status: PosOrderStatus) {
     const result = await setOrderStatus(order.id, status)
-    if (!result.ok) notify(result.error ?? 'Could not update status')
-    else notify(`Updated to ${statusLabel(status)}`)
+    if (!result.ok) {
+      notify(result.error ?? 'Could not update status')
+      return
+    }
+    notify(`Updated to ${statusLabel(status)} — opening calendar`)
+    goToCalendar()
   }
 
   async function saveCustomization() {
@@ -61,7 +71,8 @@ function OrderDetailView({ order }: { order: PosOrder }) {
       },
       'Customization updated',
     )
-    notify('Customization saved')
+    notify('Customization saved — opening calendar')
+    goToCalendar()
   }
 
   return (
@@ -88,12 +99,16 @@ function OrderDetailView({ order }: { order: PosOrder }) {
             key={status}
             type="button"
             className="pos-btn pos-btn-secondary !min-h-9"
-            onClick={() => changeStatus(status)}
+            onClick={() => void changeStatus(status)}
             disabled={order.status === status}
           >
             {statusLabel(status)}
           </button>
         ))}
+      </div>
+
+      <div className="mt-6">
+        <AddToPhoneCalendar order={order} />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
@@ -144,7 +159,7 @@ function OrderDetailView({ order }: { order: PosOrder }) {
                 onChange={(e) => setCardMessage(e.target.value)}
               />
             </label>
-            <button type="button" className="pos-btn pos-btn-primary" onClick={saveCustomization}>
+            <button type="button" className="pos-btn pos-btn-primary" onClick={() => void saveCustomization()}>
               Save changes
             </button>
           </div>

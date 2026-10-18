@@ -32,7 +32,7 @@ const links = [
   { to: '/admin/concepts', label: 'Concepts', icon: Palette },
 ]
 
-const peakStatuses: PosOrderStatus[] = ['pending', 'confirmed', 'preparing', 'ready_out']
+const peakStatuses: PosOrderStatus[] = ['not_paid', 'paid', 'partial']
 
 export function PosShell() {
   const { user, logout } = usePosAuth()

@@ -28,7 +28,7 @@ create table public.pos_orders (
   created_at timestamptz not null default now(),
   source text not null check (source in ('messenger', 'walk-in', 'call')),
   status text not null check (
-    status in ('pending', 'confirmed', 'preparing', 'ready_out', 'completed', 'cancelled')
+    status in ('not_paid', 'paid', 'partial', 'cancelled')
   ),
   customer_name text not null,
   customer_phone text not null default '',
@@ -45,6 +45,7 @@ create table public.pos_orders (
   reminder_done boolean not null default false,
   history jsonb not null default '[]'::jsonb,
   subtotal numeric(12, 2) not null default 0,
+  delivery_fee numeric(12, 2) not null default 0 check (delivery_fee >= 0),
   total numeric(12, 2) not null default 0,
   stock_applied boolean not null default false,
   updated_at timestamptz not null default now()
@@ -164,23 +165,23 @@ begin
     customer_name, customer_phone, recipient_name, recipient_phone,
     location, fulfillment, schedule_date, items, customization,
     is_preorder, supplier_note, reminder_due, reminder_done, history,
-    subtotal, total, stock_applied
+    subtotal, delivery_fee, total, stock_applied
   ) values
   (
-    'POS-1001', now(), 'messenger', 'confirmed',
+    'POS-1001', now(), 'messenger', 'paid',
     'Isabelle Cruz', '+63 917 555 1024', 'Marco Cruz', '+63 918 555 2200',
     'Makati – Poblacion', 'delivery', current_date,
     '[{"productId":"classic-red-roses","name":"Classic Red Roses","price":1500,"quantity":1}]'::jsonb,
     '{"ribbon":"Pink","wrapper":"Ivory tissue","cardMessage":"Happy anniversary — forever yours.","addOns":"","notes":"From Messenger chat this morning"}'::jsonb,
     false, '', null, false,
     jsonb_build_array(
-      jsonb_build_object('at', now(), 'by', 'Ana (staff)', 'text', 'Order encoded from Messenger'),
-      jsonb_build_object('at', now(), 'by', 'Ana (staff)', 'text', 'Status → Confirmed (stock deducted)')
+      jsonb_build_object('at', now(), 'by', 'Ana (staff)', 'text', 'Order encoded from Messenger (stock deducted)'),
+      jsonb_build_object('at', now(), 'by', 'Ana (staff)', 'text', 'Payment → paid')
     ),
-    1500, 1500, true
+    1500, 100, 1600, true
   ),
   (
-    'POS-1002', now(), 'messenger', 'pending',
+    'POS-1002', now(), 'messenger', 'not_paid',
     'Lara Mendoza', '+63 927 111 8899', 'Lara Mendoza', '+63 927 111 8899',
     'Studio Pickup', 'pickup', (current_date + 1),
     '[{"productId":"imported-tulips","name":"Dutch Tulip Bundle","price":2800,"quantity":1}]'::jsonb,
@@ -189,21 +190,20 @@ begin
     jsonb_build_array(
       jsonb_build_object('at', now(), 'by', 'Owner', 'text', 'Pre-order logged from Messenger')
     ),
-    2800, 2800, false
+    2800, 0, 2800, false
   ),
   (
-    'POS-1003', now(), 'walk-in', 'preparing',
+    'POS-1003', now(), 'walk-in', 'partial',
     'Walk-in Guest', '+63 900 000 0000', 'Sofia Reyes', '+63 916 222 3344',
     'San Jose', 'delivery', current_date,
     '[{"productId":"pastel-dreams","name":"Pastel Dreams","price":1650,"quantity":1},{"productId":"sweet-birthday","name":"Sweet Birthday Bloom","price":1450,"quantity":1}]'::jsonb,
     '{"ribbon":"Yellow","wrapper":"Blush wrap","cardMessage":"Happy Birthday!","addOns":"","notes":""}'::jsonb,
     false, '', null, false,
     jsonb_build_array(
-      jsonb_build_object('at', now(), 'by', 'Ana (staff)', 'text', 'Walk-in order created'),
-      jsonb_build_object('at', now(), 'by', 'Ana (staff)', 'text', 'Status → Confirmed'),
-      jsonb_build_object('at', now(), 'by', 'Ana (staff)', 'text', 'Status → Preparing')
+      jsonb_build_object('at', now(), 'by', 'Ana (staff)', 'text', 'Walk-in order created (stock deducted)'),
+      jsonb_build_object('at', now(), 'by', 'Ana (staff)', 'text', 'Payment → partial')
     ),
-    3100, 3100, true
+    3100, 150, 3250, true
   );
 
   return jsonb_build_object('ok', true, 'message', 'POS demo data reset');

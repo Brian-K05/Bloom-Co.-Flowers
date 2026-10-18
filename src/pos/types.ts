@@ -4,13 +4,8 @@ export type PosOrderSource = 'messenger' | 'walk-in' | 'call'
 
 export type PosFulfillment = 'delivery' | 'pickup'
 
-export type PosOrderStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'preparing'
-  | 'ready_out'
-  | 'completed'
-  | 'cancelled'
+/** Shop-floor payment status (prep pipeline removed). */
+export type PosOrderStatus = 'not_paid' | 'paid' | 'partial' | 'cancelled'
 
 export type PosThemeId =
   | 'counter-clear'
@@ -71,6 +66,7 @@ export type PosOrder = {
   reminderDone: boolean
   history: PosChangeEntry[]
   subtotal: number
+  deliveryFee: number
   total: number
   stockApplied: boolean
 }
@@ -102,4 +98,6 @@ export type PosOrderInput = {
   isPreorder: boolean
   supplierNote: string
   reminderDue: string | null
+  status?: PosOrderStatus
+  deliveryFee?: number
 }

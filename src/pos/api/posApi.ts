@@ -1,4 +1,5 @@
 import { getSupabase } from '../../lib/supabase'
+import { orderSubtotal, orderTotal } from '../lib/orderMoney'
 import type { PosArticle, PosOrder, PosOrderInput, PosOrderStatus, PosProduct } from '../types'
 import {
   mapArticle,
@@ -35,6 +36,55 @@ export type PosSnapshot = {
 type DbLocation = { id: string; label: string; sort_order: number }
 type DbOption = { id: string; kind: string; label: string; sort_order: number }
 
+async function persistProductStock(products: PosProduct[], previous: PosProduct[]) {
+  const sb = getSupabase()
+  for (const p of products) {
+    const changed = previous.find((o) => o.id === p.id)
+    if (changed && changed.stockQty !== p.stockQty) {
+      const { error } = await sb
+        .from('pos_products')
+        .update({
+          stock_qty: p.stockQty,
+          available: p.available,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', p.id)
+      if (error) throw error
+    }
+  }
+}
+
+function deductStock(
+  products: PosProduct[],
+  items: PosOrder['items'],
+): { ok: true; products: PosProduct[] } | { ok: false; error: string } {
+  for (const item of items) {
+    const product = products.find((p) => p.id === item.productId)
+    if (!product) return { ok: false, error: `Missing product ${item.productId}` }
+    if (product.stockQty < item.quantity) {
+      return { ok: false, error: `Not enough stock for ${product.name} (have ${product.stockQty})` }
+    }
+  }
+  return {
+    ok: true,
+    products: products.map((p) => {
+      const line = items.find((i) => i.productId === p.id)
+      if (!line) return p
+      const stockQty = p.stockQty - line.quantity
+      return { ...p, stockQty, available: stockQty > 0 }
+    }),
+  }
+}
+
+function restoreStock(products: PosProduct[], items: PosOrder['items']): PosProduct[] {
+  return products.map((p) => {
+    const line = items.find((i) => i.productId === p.id)
+    if (!line) return p
+    const stockQty = p.stockQty + line.quantity
+    return { ...p, stockQty, available: stockQty > 0 }
+  })
+}
+
 export async function fetchPosSnapshot(): Promise<PosSnapshot> {
   const sb = getSupabase()
   const [productsRes, ordersRes, articlesRes, locationsRes, optionsRes] = await Promise.all([
@@ -47,7 +97,6 @@ export async function fetchPosSnapshot(): Promise<PosSnapshot> {
   if (productsRes.error) throw productsRes.error
   if (ordersRes.error) throw ordersRes.error
   if (articlesRes.error) throw articlesRes.error
-  // Older projects may not have run migrate_shop_options.sql yet
   const locations =
     locationsRes.error || !locationsRes.data
       ? []
@@ -70,7 +119,7 @@ export async function apiCreateOrder(
   products: PosProduct[],
   orders: PosOrder[],
   actor: string,
-): Promise<PosOrder> {
+): Promise<{ order: PosOrder; products: PosProduct[] }> {
   const lines: PosOrder['items'] = []
   for (const line of input.items) {
     const product = products.find((p) => p.id === line.productId)
@@ -86,12 +135,28 @@ export async function apiCreateOrder(
     })
   }
   if (!lines.length) throw new Error('Add at least one product')
-  const subtotal = lines.reduce((sum, l) => sum + l.price * l.quantity, 0)
+
+  const subtotal = orderSubtotal(lines)
+  const deliveryFee = Math.max(0, Number(input.deliveryFee ?? 0))
+  const paymentStatus: PosOrderStatus =
+    input.status === 'paid' || input.status === 'partial' || input.status === 'not_paid'
+      ? input.status
+      : 'not_paid'
+
+  let nextProducts = products
+  let stockApplied = false
+  if (!input.isPreorder) {
+    const deducted = deductStock(products, lines)
+    if (!deducted.ok) throw new Error(deducted.error)
+    nextProducts = deducted.products
+    stockApplied = true
+  }
+
   const order: PosOrder = {
     id: nextPosId(orders),
     createdAt: new Date().toISOString(),
     source: input.source,
-    status: 'pending',
+    status: paymentStatus,
     customerName: input.customerName.trim(),
     customerPhone: input.customerPhone.trim(),
     recipientName: input.recipientName.trim(),
@@ -109,20 +174,28 @@ export async function apiCreateOrder(
       {
         at: new Date().toISOString(),
         by: actor,
-        text: `Order encoded from ${input.source}`,
+        text: stockApplied
+          ? `Order encoded from ${input.source} (stock deducted)`
+          : `Order encoded from ${input.source}`,
       },
     ],
     subtotal,
-    total: subtotal,
-    stockApplied: false,
+    deliveryFee,
+    total: orderTotal(subtotal, deliveryFee),
+    stockApplied,
   }
+
+  if (stockApplied) {
+    await persistProductStock(nextProducts, products)
+  }
+
   const { data, error } = await getSupabase()
     .from('pos_orders')
     .insert(toDbOrderInsert(order))
     .select('*')
     .single()
   if (error) throw error
-  return mapOrder(data as DbOrder)
+  return { order: mapOrder(data as DbOrder), products: nextProducts }
 }
 
 export async function apiUpdateOrder(
@@ -136,6 +209,11 @@ export async function apiUpdateOrder(
     ...current,
     ...patch,
     id: current.id,
+  }
+  if (patch.items || patch.deliveryFee !== undefined || patch.subtotal !== undefined) {
+    next.subtotal = patch.subtotal ?? orderSubtotal(next.items)
+    next.deliveryFee = Math.max(0, Number(next.deliveryFee ?? 0))
+    next.total = orderTotal(next.subtotal, next.deliveryFee)
   }
   if (historyText) {
     next.history = [
@@ -167,77 +245,28 @@ export async function apiSetOrderStatus(
 
   let nextProducts = products
   let stockApplied = order.stockApplied
-  const sb = getSupabase()
-
-  if (status === 'confirmed' && !order.stockApplied) {
-    for (const item of order.items) {
-      const product = nextProducts.find((p) => p.id === item.productId)
-      if (!product) throw new Error(`Missing product ${item.productId}`)
-      if (product.stockQty < item.quantity) {
-        throw new Error(`Not enough stock for ${product.name} (have ${product.stockQty})`)
-      }
-    }
-    nextProducts = products.map((p) => {
-      const line = order.items.find((i) => i.productId === p.id)
-      if (!line) return p
-      const stockQty = p.stockQty - line.quantity
-      return { ...p, stockQty, available: stockQty > 0 }
-    })
-    stockApplied = true
-    for (const p of nextProducts) {
-      const changed = products.find((o) => o.id === p.id)
-      if (changed && changed.stockQty !== p.stockQty) {
-        const { error } = await sb
-          .from('pos_products')
-          .update({
-            stock_qty: p.stockQty,
-            available: p.available,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', p.id)
-        if (error) throw error
-      }
-    }
-  }
 
   if (status === 'cancelled' && order.stockApplied) {
-    nextProducts = products.map((p) => {
-      const line = order.items.find((i) => i.productId === p.id)
-      if (!line) return p
-      const stockQty = p.stockQty + line.quantity
-      return { ...p, stockQty, available: stockQty > 0 }
-    })
+    nextProducts = restoreStock(products, order.items)
     stockApplied = false
-    for (const p of nextProducts) {
-      const changed = products.find((o) => o.id === p.id)
-      if (changed && changed.stockQty !== p.stockQty) {
-        const { error } = await sb
-          .from('pos_products')
-          .update({
-            stock_qty: p.stockQty,
-            available: p.available,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', p.id)
-        if (error) throw error
-      }
-    }
+    await persistProductStock(nextProducts, products)
+  }
+
+  // Re-encode after cancel: if moving away from cancelled back to a payment status, re-deduct
+  if (order.status === 'cancelled' && status !== 'cancelled' && !order.stockApplied && !order.isPreorder) {
+    const deducted = deductStock(products, order.items)
+    if (!deducted.ok) throw new Error(deducted.error)
+    nextProducts = deducted.products
+    stockApplied = true
+    await persistProductStock(nextProducts, products)
   }
 
   const historyText =
-    status === 'confirmed' && !order.stockApplied
-      ? 'Status → Confirmed (stock deducted)'
-      : status === 'cancelled' && order.stockApplied
-        ? 'Status → Cancelled (stock restored)'
-        : `Status → ${status}`
+    status === 'cancelled' && order.stockApplied
+      ? 'Status → Cancelled (stock restored)'
+      : `Payment → ${status}`
 
-  const updated = await apiUpdateOrder(
-    id,
-    { status, stockApplied },
-    historyText,
-    actor,
-    order,
-  )
+  const updated = await apiUpdateOrder(id, { status, stockApplied }, historyText, actor, order)
   return { order: updated, products: nextProducts }
 }
 

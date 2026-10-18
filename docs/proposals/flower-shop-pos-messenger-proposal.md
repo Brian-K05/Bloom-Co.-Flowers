@@ -88,6 +88,8 @@ Desk themes (Counter Clear, etc.) are built-in appearance options — not a sepa
 
 Shop locations and ribbon/wrapper options load from **database seeders**, same as products.
 
+**Shop-floor revision (approved):** Today’s orders / Orders use a Word-log layout (No. · Time · Customer · Order lines · Amount · Remarks). Prep statuses (Pending / Confirmed / Preparing…) are removed. Payment is **Not paid / Paid / Partial / Cancelled**; pickup vs delivery stays in Remarks. Stock deducts on encode. Maxim / delivery fee is tracked on the order total. Orders filters include product, flower type, and color.
+
 ---
 
 ## 5. Payment terms (Track B)

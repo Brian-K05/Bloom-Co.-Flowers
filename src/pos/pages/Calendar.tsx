@@ -45,7 +45,7 @@ export function PosCalendarPage() {
   }, [anchor])
 
   const scheduled = orders.filter((o) => o.status !== 'cancelled')
-  const confirmed = orders.filter((o) => !['pending', 'cancelled'].includes(o.status))
+  const confirmed = orders.filter((o) => o.status === 'paid' || o.status === 'partial')
   const weekOrders = useMemo(() => {
     const keys = new Set(days.map(toISO))
     return scheduled.filter((o) => keys.has(o.scheduleDate))
@@ -137,7 +137,7 @@ export function PosCalendarPage() {
       </div>
 
       <p className="mt-4 text-xs" style={{ color: 'var(--pos-muted)' }}>
-        Active scheduled: {scheduled.length} · Post-confirm focus: {confirmed.length} · This week: {weekOrders.length}
+        Active scheduled: {scheduled.length} · Paid / partial: {confirmed.length} · This week: {weekOrders.length}
       </p>
     </div>
   )

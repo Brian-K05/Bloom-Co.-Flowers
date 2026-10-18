@@ -1,4 +1,12 @@
-import type { PosArticle, PosChangeEntry, PosCustomization, PosOrder, PosOrderItem, PosProduct } from '../types'
+import type {
+  PosArticle,
+  PosChangeEntry,
+  PosCustomization,
+  PosOrder,
+  PosOrderItem,
+  PosOrderStatus,
+  PosProduct,
+} from '../types'
 
 export type DbProduct = {
   id: string
@@ -15,7 +23,7 @@ export type DbOrder = {
   id: string
   created_at: string
   source: PosOrder['source']
-  status: PosOrder['status']
+  status: string
   customer_name: string
   customer_phone: string
   recipient_name: string
@@ -31,6 +39,7 @@ export type DbOrder = {
   reminder_done: boolean
   history: PosChangeEntry[] | string
   subtotal: number | string
+  delivery_fee?: number | string | null
   total: number | string
   stock_applied: boolean
 }
@@ -53,6 +62,14 @@ function parseJson<T>(value: T | string, fallback: T): T {
   return value ?? fallback
 }
 
+/** Map legacy prep statuses from older demos onto payment statuses. */
+export function normalizeOrderStatus(raw: string): PosOrderStatus {
+  if (raw === 'not_paid' || raw === 'paid' || raw === 'partial' || raw === 'cancelled') return raw
+  if (raw === 'pending') return 'not_paid'
+  if (raw === 'confirmed' || raw === 'preparing' || raw === 'ready_out' || raw === 'completed') return 'paid'
+  return 'not_paid'
+}
+
 export function mapProduct(row: DbProduct): PosProduct {
   return {
     id: row.id,
@@ -67,11 +84,13 @@ export function mapProduct(row: DbProduct): PosProduct {
 }
 
 export function mapOrder(row: DbOrder): PosOrder {
+  const subtotal = Number(row.subtotal)
+  const deliveryFee = Number(row.delivery_fee ?? 0)
   return {
     id: row.id,
     createdAt: row.created_at,
     source: row.source,
-    status: row.status,
+    status: normalizeOrderStatus(row.status),
     customerName: row.customer_name,
     customerPhone: row.customer_phone,
     recipientName: row.recipient_name,
@@ -92,7 +111,8 @@ export function mapOrder(row: DbOrder): PosOrder {
     reminderDue: row.reminder_due ? String(row.reminder_due).slice(0, 10) : null,
     reminderDone: row.reminder_done,
     history: parseJson(row.history, []),
-    subtotal: Number(row.subtotal),
+    subtotal,
+    deliveryFee,
     total: Number(row.total),
     stockApplied: row.stock_applied,
   }
@@ -141,6 +161,7 @@ export function toDbOrderInsert(order: PosOrder) {
     reminder_done: order.reminderDone,
     history: order.history,
     subtotal: order.subtotal,
+    delivery_fee: order.deliveryFee,
     total: order.total,
     stock_applied: order.stockApplied,
   }

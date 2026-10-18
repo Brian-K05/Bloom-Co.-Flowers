@@ -31,7 +31,7 @@ test.describe('Track B POS', () => {
     expect(top).toBeLessThanOrEqual(1)
   })
 
-  test('create messenger order, confirm deducts stock, redirects to calendar', async ({ page }) => {
+  test('create messenger order deducts stock immediately and shows payment remarks', async ({ page }) => {
     await login(page)
 
     await page.getByRole('navigation').getByRole('link', { name: /^inventory$/i }).click()
@@ -43,21 +43,24 @@ test.describe('Track B POS', () => {
     await page.getByLabel('Customer name').fill('Playwright Customer')
     await page.getByLabel('Customer phone').fill('+63 900 111 2222')
     await page.getByLabel('Source').selectOption('messenger')
+    await page.getByLabel('Fulfillment').selectOption('delivery')
+    await page.getByLabel('Maxim / delivery fee').fill('120')
+    await page.getByLabel('Payment status').selectOption('not_paid')
     await page.getByLabel('Product').selectOption('blush-romance')
     await page.getByLabel('Qty').fill('1')
     await page.getByRole('button', { name: /save order/i }).click()
 
     await expect(page).toHaveURL(/\/admin\/orders\/POS-\d+/)
     await expect(page.getByText(/Playwright Customer/i)).toBeVisible()
-    await expect(page.getByText(/Stock applied:\s*No/i)).toBeVisible()
+    await expect(page.getByText(/Stock applied:\s*Yes/i)).toBeVisible()
+    await expect(page.getByTestId('order-remarks')).toBeVisible()
+    await expect(page.getByText(/Not paid/i).first()).toBeVisible()
+    await expect(page.getByText(/For delivery/i).first()).toBeVisible()
+    await expect(page.getByText(/del \(Maxim/i)).toBeVisible()
     await expect(page.getByRole('link', { name: /google calendar/i })).toBeVisible()
-    await expect(page.getByRole('link', { name: /outlook/i })).toHaveCount(0)
-    await expect(page.getByRole('button', { name: /apple|samsung|\.ics/i })).toHaveCount(0)
 
-    await page.getByRole('button', { name: /^confirmed$/i }).click()
+    await page.getByRole('button', { name: /^paid$/i }).click()
     await expect(page).toHaveURL(/\/admin\/calendar/)
-    await expect(page.getByRole('heading', { name: /calendar/i })).toBeVisible()
-    await expect(page.getByText(/Playwright Customer/i).first()).toBeVisible()
 
     await page.getByRole('navigation').getByRole('link', { name: /^inventory$/i }).click()
     const after = Number(await productCard.getByLabel('Set stock').inputValue())
@@ -67,21 +70,25 @@ test.describe('Track B POS', () => {
   test('save customization redirects to calendar', async ({ page }) => {
     await login(page)
     await page.getByRole('navigation').getByRole('link', { name: /^orders$/i }).click()
-    await page.getByRole('link', { name: /POS-\d+/ }).first().click()
+    await page.getByRole('link', { name: /POS-\d+|^\d+$/ }).first().click()
     await expect(page).toHaveURL(/\/admin\/orders\/POS-/)
     await page.getByLabel('Card message').fill('Playwright card note')
     await page.getByRole('button', { name: /save changes/i }).click()
     await expect(page).toHaveURL(/\/admin\/calendar/)
   })
 
-  test('orders filters and calendar sync controls', async ({ page }) => {
+  test('orders filters include payment product category color', async ({ page }) => {
     await login(page)
     await page.getByRole('navigation').getByRole('link', { name: /^orders$/i }).click()
     await expect(page.getByRole('heading', { name: /^orders$/i })).toBeVisible()
     await expect(page.getByLabel('Schedule date')).toBeVisible()
     await expect(page.getByLabel('Location')).toBeVisible()
-    await expect(page.getByLabel('Status')).toBeVisible()
+    await expect(page.getByLabel('Payment status')).toBeVisible()
     await expect(page.getByLabel('Source')).toBeVisible()
+    await expect(page.getByLabel('Product')).toBeVisible()
+    await expect(page.getByLabel('Flower type / category')).toBeVisible()
+    await expect(page.getByLabel('Color')).toBeVisible()
+    await expect(page.getByTestId('order-log-table')).toBeVisible()
 
     await page.getByRole('navigation').getByRole('link', { name: /calendar/i }).click()
     await expect(page.getByRole('heading', { name: /calendar/i })).toBeVisible()

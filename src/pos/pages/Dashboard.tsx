@@ -3,11 +3,12 @@ import { useToast } from '../../context/ToastContext'
 import { formatPHP, todayISODate } from '../../lib/format'
 import { usePosAuth } from '../auth/PosAuthContext'
 import { usePosTheme } from '../PosThemeProvider'
+import { OrderLogTable } from '../components/OrderLogTable'
 import { StatusBadge, statusLabel } from '../components/StatusBadge'
 import { usePos } from '../store/PosContext'
 import type { PosOrder, PosOrderStatus } from '../types'
 
-const boardColumns: PosOrderStatus[] = ['pending', 'confirmed', 'preparing', 'ready_out']
+const boardColumns: PosOrderStatus[] = ['not_paid', 'paid', 'partial', 'cancelled']
 
 export function PosDashboardPage() {
   const { orders, products, resetDemo, getProduct, backend } = usePos()
@@ -23,7 +24,7 @@ export function PosDashboardPage() {
   const soldOut = products.filter((p) => p.stockQty <= 0)
   const attentionStock = [...soldOut, ...lowStock]
   const salesToday = todayOrders
-    .filter((o) => o.status !== 'cancelled' && o.stockApplied)
+    .filter((o) => o.status === 'paid' || o.status === 'partial')
     .reduce((sum, o) => sum + o.total, 0)
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
@@ -40,7 +41,7 @@ export function PosDashboardPage() {
             {user?.displayName ? `, ${user.displayName.split(' ')[0]}` : ''}
           </h1>
           <p className="mt-2 max-w-xl text-sm" style={{ color: 'var(--pos-muted)' }}>
-            Encode Messenger orders here so stock, calendar, and prep stay in sync.
+            Encode Messenger orders here so stock, calendar, and money stay in sync.
           </p>
         </div>
         <button
@@ -64,7 +65,7 @@ export function PosDashboardPage() {
           value={String(todayOrders.length)}
           hint={`${deliveries} delivery · ${pickups} pickup`}
         />
-        <Stat label="Confirmed sales" value={formatPHP(salesToday)} hint="Stock applied today" />
+        <Stat label="Paid / partial sales" value={formatPHP(salesToday)} hint="Collected or partial today" />
         <Stat
           label="Low stock"
           value={String(attentionStock.length)}
@@ -87,7 +88,10 @@ export function PosDashboardPage() {
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             {boardColumns.map((status) => {
-              const column = todayOrders.filter((o) => o.status === status)
+              const column =
+                status === 'cancelled'
+                  ? orders.filter((o) => o.scheduleDate === today && o.status === 'cancelled')
+                  : todayOrders.filter((o) => o.status === status)
               return (
                 <div key={status} className="pos-surface p-3">
                   <p className="text-[11px] font-bold uppercase tracking-[0.14em]">
@@ -119,67 +123,11 @@ export function PosDashboardPage() {
                 View all
               </Link>
             </div>
-            <div className="hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[640px] text-left text-sm">
-                <thead style={{ color: 'var(--pos-muted)' }}>
-                  <tr className="border-b" style={{ borderColor: 'var(--pos-line)' }}>
-                    <th className="px-5 py-3 font-medium">Time</th>
-                    <th className="px-5 py-3 font-medium">Order</th>
-                    <th className="px-5 py-3 font-medium">Customer</th>
-                    <th className="px-5 py-3 font-medium">Product</th>
-                    <th className="px-5 py-3 font-medium">Status</th>
-                    <th className="px-5 py-3 font-medium">Source</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {todayOrders.slice(0, 8).map((order) => (
-                    <tr key={order.id} className="border-b last:border-0" style={{ borderColor: 'var(--pos-line)' }}>
-                      <td className="px-5 py-3 pos-mono text-xs">
-                        {new Date(order.createdAt).toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' })}
-                      </td>
-                      <td className="px-5 py-3">
-                        <Link to={`/admin/orders/${order.id}`} className="pos-mono text-xs font-medium hover:underline">
-                          {order.id}
-                        </Link>
-                      </td>
-                      <td className="px-5 py-3 font-medium">{order.customerName}</td>
-                      <td className="px-5 py-3" style={{ color: 'var(--pos-muted)' }}>
-                        {order.items.map((i) => i.name).join(', ')}
-                      </td>
-                      <td className="px-5 py-3">
-                        <StatusBadge status={order.status} />
-                      </td>
-                      <td className="px-5 py-3 capitalize">{order.source}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {!todayOrders.length ? (
-                <p className="px-5 py-10 text-sm" style={{ color: 'var(--pos-muted)' }}>
-                  No orders scheduled today yet. Encode from Messenger when a chat closes.
-                </p>
-              ) : null}
-            </div>
-            <ul className="divide-y md:hidden" style={{ borderColor: 'var(--pos-line)' }}>
-              {todayOrders.slice(0, 8).map((order) => (
-                <li key={order.id} className="flex items-center justify-between gap-3 px-4 py-3">
-                  <div className="min-w-0">
-                    <Link to={`/admin/orders/${order.id}`} className="font-medium hover:underline">
-                      {order.customerName}
-                    </Link>
-                    <p className="truncate text-xs" style={{ color: 'var(--pos-muted)' }}>
-                      <span className="pos-mono">{order.id}</span> · {order.items[0]?.name}
-                    </p>
-                  </div>
-                  <StatusBadge status={order.status} />
-                </li>
-              ))}
-              {!todayOrders.length ? (
-                <li className="px-4 py-8 text-sm" style={{ color: 'var(--pos-muted)' }}>
-                  No orders scheduled today yet.
-                </li>
-              ) : null}
-            </ul>
+            <OrderLogTable
+              orders={todayOrders.slice(0, 8)}
+              emptyMessage="No orders scheduled today yet. Encode from Messenger when a chat closes."
+              linkPrefix="/admin/orders"
+            />
           </div>
 
           <div className="space-y-4">
@@ -266,13 +214,14 @@ function KanbanCard({ order, productImage }: { order: PosOrder; productImage?: s
           <p className="mt-0.5 truncate font-medium">{order.customerName}</p>
           <p className="truncate text-xs" style={{ color: 'var(--pos-muted)' }}>
             {order.items[0]?.name}
+            {order.deliveryFee > 0 ? ` · del ${formatPHP(order.deliveryFee)}` : ''}
           </p>
         </div>
       </div>
       <div className="mt-2 flex items-center justify-between gap-2">
         <StatusBadge status={order.status} />
         <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--pos-muted)' }}>
-          {order.source}
+          {order.fulfillment === 'delivery' ? 'For delivery' : 'For pickup'}
         </span>
       </div>
     </Link>

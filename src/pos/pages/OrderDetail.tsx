@@ -3,18 +3,11 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useToast } from '../../context/ToastContext'
 import { formatDateTime, formatPHP } from '../../lib/format'
 import { AddToPhoneCalendar } from '../components/AddToPhoneCalendar'
-import { StatusBadge, statusLabel } from '../components/StatusBadge'
+import { FulfillmentBadge, RemarksBlock, StatusBadge, statusLabel } from '../components/StatusBadge'
 import { usePos } from '../store/PosContext'
 import type { PosOrder, PosOrderStatus } from '../types'
 
-const nextStatuses: PosOrderStatus[] = [
-  'pending',
-  'confirmed',
-  'preparing',
-  'ready_out',
-  'completed',
-  'cancelled',
-]
+const paymentStatuses: PosOrderStatus[] = ['not_paid', 'paid', 'partial', 'cancelled']
 
 export function PosOrderDetailPage() {
   const { id } = useParams()
@@ -42,6 +35,7 @@ function OrderDetailView({ order }: { order: PosOrder }) {
   const [ribbon, setRibbon] = useState(order.customization.ribbon)
   const [wrapper, setWrapper] = useState(order.customization.wrapper)
   const [cardMessage, setCardMessage] = useState(order.customization.cardMessage)
+  const [deliveryFee, setDeliveryFee] = useState(String(order.deliveryFee ?? 0))
   const ribbonChoices = ribbons.includes(order.customization.ribbon)
     ? ribbons
     : [order.customization.ribbon, ...ribbons].filter(Boolean)
@@ -59,7 +53,7 @@ function OrderDetailView({ order }: { order: PosOrder }) {
       notify(result.error ?? 'Could not update status')
       return
     }
-    notify(`Updated to ${statusLabel(status)} — opening calendar`)
+    notify(`Payment → ${statusLabel(status)} — opening calendar`)
     goToCalendar()
   }
 
@@ -80,6 +74,12 @@ function OrderDetailView({ order }: { order: PosOrder }) {
     goToCalendar()
   }
 
+  async function saveDeliveryFee() {
+    const fee = Math.max(0, Number(deliveryFee) || 0)
+    await updateOrder(order.id, { deliveryFee: fee }, `Delivery fee → ${formatPHP(fee)}`)
+    notify('Delivery fee saved')
+  }
+
   return (
     <div className="mx-auto max-w-4xl">
       <Link to="/admin/orders" className="text-xs uppercase tracking-[0.16em]" style={{ color: 'var(--pos-muted)' }}>
@@ -92,14 +92,26 @@ function OrderDetailView({ order }: { order: PosOrder }) {
           </p>
           <h1 className="mt-1 text-3xl">{order.customerName}</h1>
           <p className="mt-1 text-sm capitalize" style={{ color: 'var(--pos-muted)' }}>
-            {order.source} · {order.fulfillment} · {order.scheduleDate} · {order.location}
+            {order.source} · {order.scheduleDate} · {order.location}
           </p>
         </div>
-        <StatusBadge status={order.status} />
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusBadge status={order.status} />
+          <FulfillmentBadge fulfillment={order.fulfillment} />
+        </div>
+      </div>
+
+      <div className="pos-surface mt-4 p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--pos-muted)' }}>
+          Remarks
+        </p>
+        <div className="mt-2">
+          <RemarksBlock status={order.status} fulfillment={order.fulfillment} location={order.location} />
+        </div>
       </div>
 
       <div className="mt-6 flex flex-wrap gap-2">
-        {nextStatuses.map((status) => (
+        {paymentStatuses.map((status) => (
           <button
             key={status}
             type="button"
@@ -128,13 +140,38 @@ function OrderDetailView({ order }: { order: PosOrder }) {
                 <span>{formatPHP(item.price * item.quantity)}</span>
               </li>
             ))}
+            {order.deliveryFee > 0 || order.fulfillment === 'delivery' ? (
+              <li className="flex justify-between gap-3" style={{ color: 'var(--pos-muted)' }}>
+                <span>del (Maxim / delivery)</span>
+                <span>{formatPHP(order.deliveryFee)}</span>
+              </li>
+            ) : null}
           </ul>
           <p className="mt-4 border-t pt-3 font-semibold" style={{ borderColor: 'var(--pos-line)' }}>
             Total {formatPHP(order.total)}
           </p>
           <p className="mt-2 text-xs" style={{ color: 'var(--pos-muted)' }}>
-            Stock applied: {order.stockApplied ? 'Yes' : 'No (pending confirm)'}
+            Stock applied: {order.stockApplied ? 'Yes (on encode)' : 'No (pre-order)'}
           </p>
+
+          {order.fulfillment === 'delivery' ? (
+            <div className="mt-4 grid gap-2 border-t pt-4" style={{ borderColor: 'var(--pos-line)' }}>
+              <label className="pos-label">
+                Maxim / delivery fee
+                <input
+                  type="number"
+                  min={0}
+                  step={1}
+                  className="pos-field mt-1"
+                  value={deliveryFee}
+                  onChange={(e) => setDeliveryFee(e.target.value)}
+                />
+              </label>
+              <button type="button" className="pos-btn pos-btn-secondary" onClick={() => void saveDeliveryFee()}>
+                Save delivery fee
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <div className="pos-surface p-5">

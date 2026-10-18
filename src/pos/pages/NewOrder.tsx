@@ -4,7 +4,7 @@ import { formatPHP, todayISODate } from '../../lib/format'
 import { useToast } from '../../context/ToastContext'
 import { usePosTheme } from '../PosThemeProvider'
 import { usePos } from '../store/PosContext'
-import type { PosFulfillment, PosOrderSource } from '../types'
+import type { PosFulfillment, PosOrderSource, PosOrderStatus } from '../types'
 import { BloomImage } from '../../components/ui/BloomImage'
 
 export function PosNewOrderPage() {
@@ -21,6 +21,8 @@ export function PosNewOrderPage() {
   const [location, setLocation] = useState('')
   const [fulfillment, setFulfillment] = useState<PosFulfillment>('delivery')
   const [scheduleDate, setScheduleDate] = useState(todayISODate())
+  const [paymentStatus, setPaymentStatus] = useState<PosOrderStatus>('not_paid')
+  const [deliveryFee, setDeliveryFee] = useState('0')
   const [productId, setProductId] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [ribbon, setRibbon] = useState('')
@@ -60,6 +62,7 @@ export function PosNewOrderPage() {
       notify('Customer name and at least one product are required.')
       return
     }
+    const fee = fulfillment === 'delivery' ? Math.max(0, Number(deliveryFee) || 0) : 0
     const order = await createOrder({
       source,
       customerName,
@@ -74,6 +77,8 @@ export function PosNewOrderPage() {
       isPreorder,
       supplierNote,
       reminderDue: isPreorder ? reminderDue : null,
+      status: paymentStatus,
+      deliveryFee: fee,
     })
     if (!order) {
       notify('Could not create order — check stock or product selection.')
@@ -115,6 +120,38 @@ export function PosNewOrderPage() {
             required
           />
         </label>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="pos-label">
+          Payment status
+          <select
+            className="pos-field mt-1"
+            value={paymentStatus}
+            onChange={(e) => setPaymentStatus(e.target.value as PosOrderStatus)}
+          >
+            <option value="not_paid">Not paid</option>
+            <option value="paid">Paid</option>
+            <option value="partial">Partial</option>
+          </select>
+        </label>
+        {fulfillment === 'delivery' ? (
+          <label className="pos-label">
+            Maxim / delivery fee
+            <input
+              type="number"
+              min={0}
+              step={1}
+              className="pos-field mt-1"
+              value={deliveryFee}
+              onChange={(e) => setDeliveryFee(e.target.value)}
+            />
+          </label>
+        ) : (
+          <p className="self-end text-sm" style={{ color: 'var(--pos-muted)' }}>
+            Pickup — no delivery fee
+          </p>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -222,9 +259,14 @@ export function PosNewOrderPage() {
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t pt-4" style={{ borderColor: 'var(--pos-line)' }}>
         <p className="text-sm" style={{ color: 'var(--pos-muted)' }}>
-          Line total:{' '}
+          Order total:{' '}
           <strong style={{ color: 'var(--pos-ink)' }}>
-            {selected ? formatPHP(selected.price * quantity) : '—'}
+            {selected
+              ? formatPHP(
+                  selected.price * quantity +
+                    (fulfillment === 'delivery' ? Math.max(0, Number(deliveryFee) || 0) : 0),
+                )
+              : '—'}
           </strong>
         </p>
         <button type="submit" className="pos-btn pos-btn-primary">

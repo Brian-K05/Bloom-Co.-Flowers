@@ -1,25 +1,36 @@
-import type { PosOrderStatus } from '../types'
+import type { PosFulfillment, PosOrderStatus } from '../types'
 
 const labels: Record<PosOrderStatus, string> = {
-  pending: 'Pending',
-  confirmed: 'Confirmed',
-  preparing: 'Preparing',
-  ready_out: 'Ready / Out',
-  completed: 'Completed',
+  not_paid: 'Not paid',
+  paid: 'Paid',
+  partial: 'Partial',
+  cancelled: 'Cancelled',
+}
+
+const shortLabels: Record<PosOrderStatus, string> = {
+  not_paid: 'NP',
+  paid: 'Paid',
+  partial: 'Partial',
   cancelled: 'Cancelled',
 }
 
 const tones: Record<PosOrderStatus, { bg: string; ink: string }> = {
-  pending: { bg: 'var(--pos-status-pending)', ink: 'var(--pos-status-pending-ink)' },
-  confirmed: { bg: 'var(--pos-status-confirmed)', ink: 'var(--pos-status-confirmed-ink)' },
-  preparing: { bg: 'var(--pos-status-preparing)', ink: 'var(--pos-status-preparing-ink)' },
-  ready_out: { bg: 'var(--pos-status-ready)', ink: 'var(--pos-status-ready-ink)' },
-  completed: { bg: 'var(--pos-status-completed)', ink: 'var(--pos-status-completed-ink)' },
+  not_paid: { bg: 'var(--pos-status-pending)', ink: 'var(--pos-status-pending-ink)' },
+  paid: { bg: 'var(--pos-status-confirmed)', ink: 'var(--pos-status-confirmed-ink)' },
+  partial: { bg: 'var(--pos-status-preparing)', ink: 'var(--pos-status-preparing-ink)' },
   cancelled: { bg: 'var(--pos-status-cancelled)', ink: 'var(--pos-status-cancelled-ink)' },
 }
 
 export function statusLabel(status: PosOrderStatus) {
   return labels[status]
+}
+
+export function statusShortLabel(status: PosOrderStatus) {
+  return shortLabels[status]
+}
+
+export function fulfillmentLabel(fulfillment: PosFulfillment) {
+  return fulfillment === 'delivery' ? 'For delivery' : 'For pickup'
 }
 
 export function StatusBadge({ status }: { status: PosOrderStatus }) {
@@ -35,5 +46,47 @@ export function StatusBadge({ status }: { status: PosOrderStatus }) {
     >
       {labels[status]}
     </span>
+  )
+}
+
+export function FulfillmentBadge({ fulfillment }: { fulfillment: PosFulfillment }) {
+  return (
+    <span
+      data-fulfillment-badge
+      className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]"
+      style={{
+        background: 'var(--pos-status-ready)',
+        color: 'var(--pos-status-ready-ink)',
+      }}
+    >
+      {fulfillmentLabel(fulfillment)}
+    </span>
+  )
+}
+
+/** Word-log style remarks: payment + pickup/delivery (+ optional location). */
+export function RemarksBlock({
+  status,
+  fulfillment,
+  location,
+  compact,
+}: {
+  status: PosOrderStatus
+  fulfillment: PosFulfillment
+  location?: string
+  compact?: boolean
+}) {
+  return (
+    <div className={compact ? 'space-y-0.5 text-xs' : 'space-y-1 text-sm'} data-testid="order-remarks">
+      <div className="flex flex-wrap gap-1.5">
+        <StatusBadge status={status} />
+        <FulfillmentBadge fulfillment={fulfillment} />
+      </div>
+      {location ? (
+        <p style={{ color: 'var(--pos-muted)' }} className={compact ? 'text-[11px]' : 'text-xs'}>
+          {location}
+        </p>
+      ) : null}
+    </div>
   )
 }

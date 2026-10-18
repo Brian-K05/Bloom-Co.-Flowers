@@ -22,6 +22,7 @@ import {
   fetchPosSnapshot,
 } from '../api/posApi'
 import { usePosAuth } from '../auth/PosAuthContext'
+import { orderSubtotal, orderTotal } from '../lib/orderMoney'
 import { POS_LOCATIONS, RIBBON_OPTIONS, WRAPPER_OPTIONS, seedArticles, seedOrders, seedProducts } from '../seed'
 import type {
   PosArticle,
@@ -176,9 +177,10 @@ export function PosProvider({ children }: { children: ReactNode }) {
     async (input: PosOrderInput) => {
       try {
         if (backend === 'supabase') {
-          const order = await apiCreateOrder(input, products, orders, actor)
-          setOrders((prev) => [order, ...prev])
-          return order
+          const result = await apiCreateOrder(input, products, orders, actor)
+          setProducts(result.products)
+          setOrders((prev) => [result.order, ...prev])
+          return result.order
         }
         const lines: PosOrder['items'] = []
         for (const line of input.items) {
@@ -193,12 +195,25 @@ export function PosProvider({ children }: { children: ReactNode }) {
           })
         }
         if (!lines.length) return null
-        const subtotal = lines.reduce((sum, l) => sum + l.price * l.quantity, 0)
+        const subtotal = orderSubtotal(lines)
+        const deliveryFee = Math.max(0, Number(input.deliveryFee ?? 0))
+        const paymentStatus: PosOrderStatus =
+          input.status === 'paid' || input.status === 'partial' || input.status === 'not_paid'
+            ? input.status
+            : 'not_paid'
+        let nextProducts = products
+        let stockApplied = false
+        if (!input.isPreorder) {
+          const stock = applyStock(products, lines, 'deduct')
+          if (!stock.ok) return null
+          nextProducts = stock.products
+          stockApplied = true
+        }
         const order: PosOrder = {
           id: nextPosId(orders),
           createdAt: new Date().toISOString(),
           source: input.source,
-          status: 'pending',
+          status: paymentStatus,
           customerName: input.customerName.trim(),
           customerPhone: input.customerPhone.trim(),
           recipientName: input.recipientName.trim(),
@@ -213,14 +228,21 @@ export function PosProvider({ children }: { children: ReactNode }) {
           reminderDue: input.isPreorder ? input.reminderDue : null,
           reminderDone: false,
           history: [
-            { at: new Date().toISOString(), by: actor, text: `Order encoded from ${input.source}` },
+            {
+              at: new Date().toISOString(),
+              by: actor,
+              text: stockApplied
+                ? `Order encoded from ${input.source} (stock deducted)`
+                : `Order encoded from ${input.source}`,
+            },
           ],
           subtotal,
-          total: subtotal,
-          stockApplied: false,
+          deliveryFee,
+          total: orderTotal(subtotal, deliveryFee),
+          stockApplied,
         }
         const nextOrders = [order, ...orders]
-        persistLocal(products, nextOrders, articles)
+        persistLocal(nextProducts, nextOrders, articles)
         return order
       } catch {
         return null
@@ -241,6 +263,11 @@ export function PosProvider({ children }: { children: ReactNode }) {
       const nextOrders = orders.map((order) => {
         if (order.id !== id) return order
         const next = { ...order, ...patch, id: order.id }
+        if (patch.items || patch.deliveryFee !== undefined || patch.subtotal !== undefined) {
+          next.subtotal = patch.subtotal ?? orderSubtotal(next.items)
+          next.deliveryFee = Math.max(0, Number(next.deliveryFee ?? 0))
+          next.total = orderTotal(next.subtotal, next.deliveryFee)
+        }
         if (historyText) {
           next.history = [
             ...order.history,
@@ -268,17 +295,17 @@ export function PosProvider({ children }: { children: ReactNode }) {
         if (order.status === status) return { ok: true }
         let nextProducts = products
         let stockApplied = order.stockApplied
-        if (status === 'confirmed' && !order.stockApplied) {
-          const result = applyStock(products, order.items, 'deduct')
-          if (!result.ok) return { ok: false, error: result.error }
-          nextProducts = result.products
-          stockApplied = true
-        }
         if (status === 'cancelled' && order.stockApplied) {
           const result = applyStock(products, order.items, 'restore')
           if (!result.ok) return { ok: false, error: result.error }
           nextProducts = result.products
           stockApplied = false
+        }
+        if (order.status === 'cancelled' && status !== 'cancelled' && !order.stockApplied && !order.isPreorder) {
+          const result = applyStock(products, order.items, 'deduct')
+          if (!result.ok) return { ok: false, error: result.error }
+          nextProducts = result.products
+          stockApplied = true
         }
         const nextOrders = orders.map((o) =>
           o.id === id
@@ -292,11 +319,9 @@ export function PosProvider({ children }: { children: ReactNode }) {
                     at: new Date().toISOString(),
                     by: actor,
                     text:
-                      status === 'confirmed' && !order.stockApplied
-                        ? 'Status → Confirmed (stock deducted)'
-                        : status === 'cancelled' && order.stockApplied
-                          ? 'Status → Cancelled (stock restored)'
-                          : `Status → ${status}`,
+                      status === 'cancelled' && order.stockApplied
+                        ? 'Status → Cancelled (stock restored)'
+                        : `Payment → ${status}`,
                   },
                 ],
               }

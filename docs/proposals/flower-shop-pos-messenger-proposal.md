@@ -3,9 +3,11 @@
 **Prepared by:** Salora Tech Solutions  
 **Product name:** Bloom Desk (Track B Admin POS)  
 **Date:** 2026-10-15 (updated to match live system)  
-**Status:** Matches the deployed `/admin` POS + Supabase demo  
+**Status:** Matches Bloom Desk Track B (POS-only product)  
+**Distribution copy (send to any flower shop):**  
+`Documents/Brian Projects/POS Flowershop/PROPOSAL.md`
 
-> **Supersedes** the older Word file `PROPOSE_SYSTEM_FLOWER SHOP (1).docx` (₱15,000 customer website with cart/checkout). That package is **not** what we built. See [website-scope-parked.md](./website-scope-parked.md).
+> **Supersedes** the older Word file `PROPOSE_SYSTEM_FLOWER SHOP (1).docx` (₱15,000 customer website with cart/checkout). That package is **not** what we sell. See [website-scope-parked.md](./website-scope-parked.md).
 
 ---
 
@@ -41,7 +43,7 @@ Customers keep ordering on **Facebook Messenger** (and walk-in / call). Staff en
 flowchart LR
   customer[Customer on Messenger]
   staff[Staff / Owner]
-  pos[Bloom Desk /admin]
+  pos[Bloom Desk POS login]
   db[(Supabase PostgreSQL)]
 
   customer -->|human chat| staff
@@ -53,9 +55,10 @@ flowchart LR
   pos --> prep[Filters by date and place]
 ```
 
-- **Frontend:** Vite + React admin under `/admin`  
+- **Frontend:** Vite + React POS (`/login` → desk) — no public website in the sellable product  
 - **Backend:** Supabase (`pos_products`, `pos_orders`, `pos_articles`, `pos_locations`, `pos_options`)  
 - **Demo reset:** Dashboard → Reset demo → RPC `reset_pos_demo()` reloads seed rows  
+- **Per shop:** own Supabase project + hosting deploy when paid  
 
 ---
 
@@ -80,7 +83,8 @@ flowchart LR
 6. Inventory (product CRUD + stock)  
 7. Pre-orders / reminders  
 8. Flower reference  
-9. Concepts gallery (presenter UI themes — internal walkthrough, not a customer storefront)
+
+Desk themes (Counter Clear, etc.) are built-in appearance options — not a separate “concepts website.”
 
 Shop locations and ribbon/wrapper options load from **database seeders**, same as products.
 

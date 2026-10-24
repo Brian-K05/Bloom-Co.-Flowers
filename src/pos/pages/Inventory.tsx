@@ -3,7 +3,15 @@ import { formatPHP } from '../../lib/format'
 import { images } from '../../lib/images'
 import { useToast } from '../../context/ToastContext'
 import { usePos } from '../store/PosContext'
-import type { PosProduct } from '../types'
+import {
+  ARRANGEMENT_KINDS,
+  BOUQUET_COLORS,
+  BOUQUET_SIZES,
+  arrangementLabel,
+  parseRecipeText,
+  recipeText,
+} from '../lib/catalog'
+import type { PosArrangementKind, PosProduct } from '../types'
 
 const CATEGORIES = ['Roses', 'Bouquets', 'Boxes', 'Imported', 'Seasonal', 'Other']
 
@@ -65,6 +73,10 @@ export function PosInventoryPage() {
     const category = String(fd.get('category') || 'Bouquets')
     const image = String(fd.get('image') || IMAGE_PRESETS[0].url)
     const isImported = fd.get('isImported') === 'on'
+    const kind = String(fd.get('kind') || 'other') as PosArrangementKind
+    const sizeRaw = Number(fd.get('size'))
+    const color = String(fd.get('color') || '').trim()
+    const recipe = parseRecipeText(String(fd.get('recipe') || ''))
 
     if (!name) {
       notify('Enter a product name')
@@ -98,6 +110,10 @@ export function PosInventoryPage() {
       available: stockQty > 0,
       image: image || IMAGE_PRESETS[0].url,
       isImported: isImported || category === 'Imported',
+      kind,
+      size: Number.isFinite(sizeRaw) && sizeRaw > 0 ? sizeRaw : undefined,
+      color: color || undefined,
+      recipe,
     }
 
     setSaving(true)
@@ -120,7 +136,7 @@ export function PosInventoryPage() {
         <div>
           <h1 className="text-3xl">Inventory</h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--pos-muted)' }}>
-            Full product CRUD — create, edit details, adjust stock, or remove. Confirm on an order deducts stock.
+            Full product CRUD. Encode deducts stock. Set size, color, and stems so Flower Tally can count for arrangers.
           </p>
         </div>
         <button
@@ -205,6 +221,47 @@ export function PosInventoryPage() {
                 </option>
               ))}
             </select>
+          </label>
+          <label className="pos-label">
+            Arrangement
+            <select name="kind" className="pos-field mt-1" defaultValue={editing?.kind ?? 'other'}>
+              {ARRANGEMENT_KINDS.map((k) => (
+                <option key={k} value={k}>
+                  {arrangementLabel(k)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="pos-label">
+            Bouquet size
+            <select name="size" className="pos-field mt-1" defaultValue={editing?.size ? String(editing.size) : ''}>
+              <option value="">—</option>
+              {BOUQUET_SIZES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="pos-label">
+            Tally color
+            <select name="color" className="pos-field mt-1" defaultValue={editing?.color ?? ''}>
+              <option value="">—</option>
+              {BOUQUET_COLORS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="pos-label sm:col-span-2 lg:col-span-3">
+            Recipe (stems) — one per line, e.g. 5 × Red rose
+            <textarea
+              name="recipe"
+              className="pos-field mt-1 min-h-20"
+              defaultValue={recipeText(editing?.recipe)}
+              placeholder={'5 × Red rose\n2 × Lily\n2 × Yellow rose'}
+            />
           </label>
           <label className="flex items-center gap-2 text-sm sm:col-span-2 lg:col-span-3" style={{ color: 'var(--pos-ink)' }}>
             <input type="checkbox" name="isImported" defaultChecked={Boolean(editing?.isImported)} />

@@ -1,4 +1,5 @@
 import type {
+  PosArrangementKind,
   PosArticle,
   PosChangeEntry,
   PosCustomization,
@@ -7,6 +8,12 @@ import type {
   PosOrderStatus,
   PosProduct,
 } from '../types'
+
+const KINDS: PosArrangementKind[] = ['bouquet', 'box', 'basket', 'spray', 'stand', 'other']
+
+function normalizeKind(raw: string | null | undefined): PosArrangementKind {
+  return KINDS.includes(raw as PosArrangementKind) ? (raw as PosArrangementKind) : 'other'
+}
 
 export type DbProduct = {
   id: string
@@ -17,6 +24,10 @@ export type DbProduct = {
   available: boolean
   image: string
   is_imported: boolean
+  kind?: string | null
+  size?: number | null
+  color?: string | null
+  recipe?: PosOrderItem['recipe'] | string | null
 }
 
 export type DbOrder = {
@@ -31,6 +42,7 @@ export type DbOrder = {
   location: string
   fulfillment: PosOrder['fulfillment']
   schedule_date: string
+  slot_time?: string | null
   items: PosOrderItem[] | string
   customization: PosCustomization | string
   is_preorder: boolean
@@ -80,6 +92,10 @@ export function mapProduct(row: DbProduct): PosProduct {
     available: row.available,
     image: row.image,
     isImported: row.is_imported,
+    kind: normalizeKind(row.kind ?? undefined),
+    size: row.size ? Number(row.size) : undefined,
+    color: row.color ?? undefined,
+    recipe: parseJson(row.recipe ?? [], []),
   }
 }
 
@@ -98,6 +114,12 @@ export function mapOrder(row: DbOrder): PosOrder {
     location: row.location,
     fulfillment: row.fulfillment,
     scheduleDate: String(row.schedule_date).slice(0, 10),
+    slotTime: (() => {
+      const raw = row.slot_time ? String(row.slot_time).slice(0, 5) : ''
+      if (/^\d{1,2}:\d{2}$/.test(raw)) return raw.padStart(5, '0')
+      const d = new Date(row.created_at)
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+    })(),
     items: parseJson(row.items, []),
     customization: parseJson(row.customization, {
       ribbon: '',
@@ -137,6 +159,10 @@ export function toDbProduct(product: PosProduct): DbProduct {
     available: product.available,
     image: product.image,
     is_imported: Boolean(product.isImported),
+    kind: product.kind ?? 'other',
+    size: product.size ?? null,
+    color: product.color ?? null,
+    recipe: product.recipe ?? [],
   }
 }
 
@@ -153,6 +179,7 @@ export function toDbOrderInsert(order: PosOrder) {
     location: order.location,
     fulfillment: order.fulfillment,
     schedule_date: order.scheduleDate,
+    slot_time: order.slotTime,
     items: order.items,
     customization: order.customization,
     is_preorder: order.isPreorder,

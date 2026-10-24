@@ -22,6 +22,7 @@ import {
   fetchPosSnapshot,
 } from '../api/posApi'
 import { usePosAuth } from '../auth/PosAuthContext'
+import { lineFromProduct, nowSlotTime } from '../lib/catalog'
 import { orderSubtotal, orderTotal } from '../lib/orderMoney'
 import { POS_LOCATIONS, RIBBON_OPTIONS, WRAPPER_OPTIONS, seedArticles, seedOrders, seedProducts } from '../seed'
 import type {
@@ -187,12 +188,7 @@ export function PosProvider({ children }: { children: ReactNode }) {
           const product = products.find((p) => p.id === line.productId)
           if (!product || line.quantity < 1) return null
           if (product.stockQty < line.quantity && !input.isPreorder) return null
-          lines.push({
-            productId: product.id,
-            name: product.name,
-            price: product.price,
-            quantity: line.quantity,
-          })
+          lines.push(lineFromProduct(product, line.quantity))
         }
         if (!lines.length) return null
         const subtotal = orderSubtotal(lines)
@@ -221,6 +217,7 @@ export function PosProvider({ children }: { children: ReactNode }) {
           location: input.location,
           fulfillment: input.fulfillment,
           scheduleDate: input.scheduleDate,
+          slotTime: input.slotTime || nowSlotTime(),
           items: lines,
           customization: input.customization,
           isPreorder: input.isPreorder,
@@ -244,8 +241,9 @@ export function PosProvider({ children }: { children: ReactNode }) {
         const nextOrders = [order, ...orders]
         persistLocal(nextProducts, nextOrders, articles)
         return order
-      } catch {
-        return null
+      } catch (err) {
+        console.error(err)
+        throw err
       }
     },
     [actor, articles, backend, orders, persistLocal, products],

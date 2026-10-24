@@ -50,17 +50,15 @@ test.describe('Track B POS', () => {
     await page.getByLabel('Qty').fill('1')
     await page.getByRole('button', { name: /save order/i }).click()
 
-    await expect(page).toHaveURL(/\/admin\/orders\/POS-\d+/)
-    await expect(page.getByText(/Playwright Customer/i)).toBeVisible()
-    await expect(page.getByText(/Stock applied:\s*Yes/i)).toBeVisible()
-    await expect(page.getByTestId('order-remarks')).toBeVisible()
-    await expect(page.getByText(/Not paid/i).first()).toBeVisible()
-    await expect(page.getByText(/For delivery/i).first()).toBeVisible()
-    await expect(page.getByText(/del \(Maxim/i)).toBeVisible()
-    await expect(page.getByRole('link', { name: /google calendar/i })).toBeVisible()
-
-    await page.getByRole('button', { name: /^paid$/i }).click()
-    await expect(page).toHaveURL(/\/admin\/calendar/)
+    await expect(page).toHaveURL(/\/admin\/orders(?:\?|$)/)
+    await expect(page.getByRole('heading', { name: /^orders$/i })).toBeVisible()
+    await expect(page.getByTestId('order-log-table')).toBeVisible()
+    await expect(page.getByText(/Playwright Customer/i).first()).toBeVisible()
+    await expect(page.getByTestId('order-remarks').getByText(/Not paid/i).first()).toBeVisible()
+    await expect(page.getByTestId('order-remarks').getByText(/For delivery/i).first()).toBeVisible()
+    await expect(
+      page.getByTestId('order-log-table').getByText(/Blush Romance|Pink rose|Lily|Yellow rose/i).first(),
+    ).toBeVisible()
 
     await page.getByRole('navigation').getByRole('link', { name: /^inventory$/i }).click()
     const after = Number(await productCard.getByLabel('Set stock').inputValue())
@@ -70,7 +68,7 @@ test.describe('Track B POS', () => {
   test('save customization redirects to calendar', async ({ page }) => {
     await login(page)
     await page.getByRole('navigation').getByRole('link', { name: /^orders$/i }).click()
-    await page.getByRole('link', { name: /POS-\d+|^\d+$/ }).first().click()
+    await page.getByRole('link', { name: /POS-\d+|#\d+/ }).first().click()
     await expect(page).toHaveURL(/\/admin\/orders\/POS-/)
     await page.getByLabel('Card message').fill('Playwright card note')
     await page.getByRole('button', { name: /save changes/i }).click()
@@ -88,7 +86,16 @@ test.describe('Track B POS', () => {
     await expect(page.getByLabel('Product')).toBeVisible()
     await expect(page.getByLabel('Flower type / category')).toBeVisible()
     await expect(page.getByLabel('Color')).toBeVisible()
-    await expect(page.getByTestId('order-log-table')).toBeVisible()
+    await expect(page.getByLabel('Time slot')).toBeVisible()
+    await expect(page.getByLabel('Search order / customer')).toBeVisible()
+    await expect(page.getByLabel('Arrangement')).toBeVisible()
+    await expect(page.getByLabel('Price')).toBeVisible()
+
+    await page.getByRole('navigation').getByRole('link', { name: /flower tally/i }).click()
+    await expect(page.getByRole('heading', { name: /flower tally/i })).toBeVisible()
+    await expect(page.getByTestId('pos-bouquet-tally')).toBeVisible()
+    await expect(page.getByTestId('pos-stem-tally')).toBeVisible()
+    await expect(page.getByTestId('pos-funeral-tally')).toBeVisible()
 
     await page.getByRole('navigation').getByRole('link', { name: /calendar/i }).click()
     await expect(page.getByRole('heading', { name: /calendar/i })).toBeVisible()

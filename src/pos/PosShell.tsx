@@ -2,6 +2,7 @@ import {
   BookOpen,
   CalendarDays,
   ClipboardList,
+  Flower2,
   LayoutDashboard,
   Menu,
   Package,
@@ -21,15 +22,28 @@ import { usePos } from './store/PosContext'
 import { posThemes } from './themes/registry'
 import type { PosOrderStatus, PosThemeId } from './types'
 
-const links = [
+type ShellLink = {
+  to: string
+  label: string
+  icon: typeof LayoutDashboard
+  end?: boolean
+  primary?: boolean
+  badge?: 'today'
+}
+
+const workspaceLinks: ShellLink[] = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
-  { to: '/admin/orders/new', label: 'New Order', icon: PlusCircle, primary: true },
-  { to: '/admin/orders', label: 'Orders', icon: ClipboardList },
+  { to: '/admin/orders', label: 'Orders', icon: ClipboardList, badge: 'today' },
   { to: '/admin/calendar', label: 'Calendar', icon: CalendarDays },
   { to: '/admin/inventory', label: 'Inventory', icon: Package },
+  { to: '/admin/prep', label: 'Flower Tally', icon: Flower2 },
+  { to: '/admin/concepts', label: 'Concepts', icon: Palette },
+]
+
+const extraLinks: ShellLink[] = [
+  { to: '/admin/orders/new', label: 'New Order', icon: PlusCircle, primary: true },
   { to: '/admin/preorders', label: 'Pre-Orders', icon: Truck },
   { to: '/admin/reference', label: 'Flower Reference', icon: BookOpen },
-  { to: '/admin/concepts', label: 'Concepts', icon: Palette },
 ]
 
 const peakStatuses: PosOrderStatus[] = ['not_paid', 'paid', 'partial']
@@ -58,13 +72,19 @@ export function PosShell() {
     window.scrollTo({ top: 0, behavior: 'auto' })
   }, [location.pathname])
 
-  const todayCounts = useMemo(() => {
-    const todays = orders.filter((o) => o.scheduleDate === today && o.status !== 'cancelled')
-    return peakStatuses.map((status) => ({
-      status,
-      count: todays.filter((o) => o.status === status).length,
-    }))
-  }, [orders, today])
+  const todayOrders = useMemo(
+    () => orders.filter((o) => o.scheduleDate === today && o.status !== 'cancelled'),
+    [orders, today],
+  )
+  const todayCount = todayOrders.length
+  const todayCounts = useMemo(
+    () =>
+      peakStatuses.map((status) => ({
+        status,
+        count: todayOrders.filter((o) => o.status === status).length,
+      })),
+    [todayOrders],
+  )
 
   const weekStrip = useMemo(() => {
     const start = new Date()
@@ -86,39 +106,55 @@ export function PosShell() {
   const isNight = themeId === 'night-shift'
   const isPeak = themeId === 'peak-board'
   const isSoft = themeId === 'bloom-ledger'
-  const isRail = theme.layout === 'rail'
   const isSplit = theme.layout === 'split'
   const divider = lightRail ? 'border-[var(--pos-line)]' : 'border-white/10'
 
+  const renderLinks = (items: ShellLink[]) =>
+    items.map((link) => {
+      const Icon = link.icon
+      return (
+        <NavLink
+          key={link.to}
+          to={link.to}
+          end={link.end}
+          className={({ isActive }) => {
+            const active =
+              link.to === '/admin/orders'
+                ? isActive && !location.pathname.startsWith('/admin/orders/new')
+                : isActive
+            return [
+              'flex items-center gap-3 rounded-2xl px-3 font-semibold transition',
+              isSoft ? 'min-h-12 py-3 text-[13px]' : 'min-h-10 py-2.5 text-[13px]',
+              active
+                ? 'bg-[var(--pos-accent)] text-[var(--pos-accent-ink)]'
+                : link.primary
+                  ? 'text-[var(--pos-accent-ink)] hover:bg-[var(--pos-accent-soft)]'
+                  : 'opacity-80 hover:bg-[var(--pos-accent-soft)] hover:opacity-100',
+            ].join(' ')
+          }}
+          title={link.label}
+        >
+          <Icon size={isSoft ? 20 : 18} />
+          <span className="flex-1">{link.label}</span>
+          {link.badge === 'today' ? (
+            <span
+              aria-hidden="true"
+              className="rounded-full px-2 py-0.5 text-[11px] font-bold"
+              style={{ background: '#1e3a2f', color: '#fff' }}
+            >
+              {todayCount}
+            </span>
+          ) : null}
+        </NavLink>
+      )
+    })
+
   const nav = (
     <nav className={`flex flex-col gap-1 p-3 ${isSoft ? 'gap-2 p-4' : ''}`}>
-      {links.map((link) => {
-        const Icon = link.icon
-        return (
-          <NavLink
-            key={link.to}
-            to={link.to}
-            end={link.end}
-            className={({ isActive }) => {
-              const active = isActive
-              return [
-                'flex items-center gap-3 rounded-[var(--pos-radius)] px-3 font-semibold transition',
-                isSoft ? 'min-h-12 py-3 text-[13px]' : 'min-h-10 py-2.5 text-[12px]',
-                isRail ? 'lg:justify-center lg:px-2 xl:justify-start xl:px-3' : '',
-                active
-                  ? 'bg-[var(--pos-accent)] text-[var(--pos-accent-ink)]'
-                  : link.primary
-                    ? 'text-[var(--pos-accent)] hover:bg-[var(--pos-accent-soft)]'
-                    : 'opacity-80 hover:opacity-100',
-              ].join(' ')
-            }}
-            title={link.label}
-          >
-            <Icon size={isSoft ? 20 : 18} />
-            <span className={isRail ? 'lg:hidden xl:inline' : ''}>{link.label}</span>
-          </NavLink>
-        )
-      })}
+      <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-[0.2em] opacity-50">Workspace</p>
+      {renderLinks(workspaceLinks)}
+      <p className="px-3 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-[0.2em] opacity-50">Desk</p>
+      {renderLinks(extraLinks)}
     </nav>
   )
 
@@ -137,9 +173,7 @@ export function PosShell() {
       data-layout={theme.layout}
     >
       <div
-        className={`mx-auto grid min-h-svh ${
-          isRail ? 'lg:grid-cols-[72px_1fr] xl:grid-cols-[240px_1fr]' : 'lg:grid-cols-[248px_1fr]'
-        }`}
+        className="mx-auto grid min-h-svh lg:grid-cols-[248px_1fr]"
       >
         <aside
           className={`pos-rail-border sticky top-0 hidden h-svh self-start overflow-y-auto lg:flex lg:flex-col ${lightRail ? 'border-r' : ''}`}
@@ -149,32 +183,34 @@ export function PosShell() {
             borderColor: 'var(--pos-line)',
           }}
         >
-          <div className={`border-b ${divider} ${isRail ? 'px-2 py-5 xl:px-5' : 'px-5 py-6'}`}>
-            <p
-              className={`text-[10px] uppercase tracking-[0.24em] opacity-70 ${isRail ? 'lg:text-center xl:text-left' : ''}`}
-            >
-              Track B POS
-            </p>
-            <p
-              className={`mt-1 font-[family-name:var(--pos-display)] font-semibold ${
-                isRail ? 'lg:text-center lg:text-lg xl:text-left xl:text-2xl' : 'text-2xl'
-              }`}
-            >
-              {isRail ? <span className="lg:inline xl:hidden">BD</span> : null}
-              <span className={isRail ? 'lg:hidden xl:inline' : ''}>Bloom Desk</span>
-            </p>
-            <p className={`mt-1 text-xs opacity-70 ${isRail ? 'lg:hidden xl:block' : ''}`}>{theme.name}</p>
+          <div className={`border-b ${divider} px-5 py-6`}>
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1e3a2f] text-white">
+                <Flower2 size={22} />
+              </span>
+              <div>
+                <p className="font-[family-name:var(--pos-display)] text-lg font-semibold">Bloom Desk</p>
+                <p className="text-[10px] uppercase tracking-[0.18em] opacity-60">Order management</p>
+              </div>
+            </div>
           </div>
           {nav}
-          <div className={`mt-auto border-t ${divider} text-xs opacity-80 ${isRail ? 'p-2 xl:p-4' : 'p-4'}`}>
-            <p className={isRail ? 'lg:hidden xl:block' : ''}>{user.displayName}</p>
-            <button
-              type="button"
-              onClick={logout}
-              className={`mt-2 underline underline-offset-2 ${isRail ? 'lg:w-full lg:text-center xl:text-left' : ''}`}
+          <div className={`mt-auto space-y-3 border-t ${divider} p-4 text-xs`}>
+            <div
+              className="rounded-2xl border px-4 py-3"
+              style={{ borderColor: 'var(--pos-line)', background: 'color-mix(in oklab, white 55%, transparent)' }}
+              data-testid="pos-today-card"
             >
-              {isRail ? <span className="lg:inline xl:hidden">Out</span> : null}
-              <span className={isRail ? 'lg:hidden xl:inline' : ''}>Log out</span>
+              <div className="flex items-center justify-between">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] opacity-60">Today</p>
+                <span className="h-2 w-2 rounded-full bg-[#e08a4a]" />
+              </div>
+              <p className="mt-1 text-3xl font-semibold">{todayCount}</p>
+              <p className="opacity-70">Orders scheduled</p>
+            </div>
+            <p className="opacity-80">{user.displayName}</p>
+            <button type="button" onClick={logout} className="underline underline-offset-2">
+              Log out
             </button>
           </div>
         </aside>

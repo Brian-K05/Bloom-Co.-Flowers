@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatPHP, todayISODate } from '../../lib/format'
 import { useToast } from '../../context/ToastContext'
+import { formatRecipe, nowSlotTime } from '../lib/catalog'
 import { usePosTheme } from '../PosThemeProvider'
 import { usePos } from '../store/PosContext'
 import type { PosFulfillment, PosOrderSource, PosOrderStatus } from '../types'
@@ -21,6 +22,7 @@ export function PosNewOrderPage() {
   const [location, setLocation] = useState('')
   const [fulfillment, setFulfillment] = useState<PosFulfillment>('delivery')
   const [scheduleDate, setScheduleDate] = useState(todayISODate())
+  const [slotTime, setSlotTime] = useState(nowSlotTime())
   const [paymentStatus, setPaymentStatus] = useState<PosOrderStatus>('not_paid')
   const [deliveryFee, setDeliveryFee] = useState('0')
   const [productId, setProductId] = useState('')
@@ -63,29 +65,34 @@ export function PosNewOrderPage() {
       return
     }
     const fee = fulfillment === 'delivery' ? Math.max(0, Number(deliveryFee) || 0) : 0
-    const order = await createOrder({
-      source,
-      customerName,
-      customerPhone,
-      recipientName: recipientName || customerName,
-      recipientPhone: recipientPhone || customerPhone,
-      location,
-      fulfillment,
-      scheduleDate,
-      items: [{ productId, quantity }],
-      customization: { ribbon, wrapper, cardMessage, addOns, notes },
-      isPreorder,
-      supplierNote,
-      reminderDue: isPreorder ? reminderDue : null,
-      status: paymentStatus,
-      deliveryFee: fee,
-    })
-    if (!order) {
-      notify('Could not create order — check stock or product selection.')
-      return
+    try {
+      const order = await createOrder({
+        source,
+        customerName,
+        customerPhone,
+        recipientName: recipientName || customerName,
+        recipientPhone: recipientPhone || customerPhone,
+        location,
+        fulfillment,
+        scheduleDate,
+        slotTime,
+        items: [{ productId, quantity }],
+        customization: { ribbon, wrapper, cardMessage, addOns, notes },
+        isPreorder,
+        supplierNote,
+        reminderDue: isPreorder ? reminderDue : null,
+        status: paymentStatus,
+        deliveryFee: fee,
+      })
+      if (!order) {
+        notify('Could not create order — check stock or product selection.')
+        return
+      }
+      notify(`${order.id} saved — showing on the order log`)
+      navigate(`/admin/orders?highlight=${order.id}`)
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Could not create order')
     }
-    notify(`${order.id} saved from ${source}.`)
-    navigate(`/admin/orders/${order.id}`)
   }
 
   const form = (
@@ -118,6 +125,15 @@ export function PosNewOrderPage() {
             value={scheduleDate}
             onChange={(e) => setScheduleDate(e.target.value)}
             required
+          />
+        </label>
+        <label className="pos-label">
+          Time slot
+          <input
+            type="time"
+            className="pos-field mt-1"
+            value={slotTime}
+            onChange={(e) => setSlotTime(e.target.value)}
           />
         </label>
       </div>
@@ -207,6 +223,12 @@ export function PosNewOrderPage() {
           />
         </label>
       </div>
+      {selected?.recipe?.length ? (
+        <p className="text-sm" style={{ color: 'var(--pos-muted)' }} data-testid="pos-recipe-preview">
+          Inside: {formatRecipe(selected.recipe)}
+          {selected.size && selected.color ? ` · ${selected.size} ${selected.color}` : ''}
+        </p>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="pos-label">

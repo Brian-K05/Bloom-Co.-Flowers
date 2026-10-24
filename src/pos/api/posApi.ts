@@ -1,4 +1,5 @@
 import { getSupabase } from '../../lib/supabase'
+import { lineFromProduct, nowSlotTime } from '../lib/catalog'
 import { orderSubtotal, orderTotal } from '../lib/orderMoney'
 import type { PosArticle, PosOrder, PosOrderInput, PosOrderStatus, PosProduct } from '../types'
 import {
@@ -127,12 +128,7 @@ export async function apiCreateOrder(
     if (product.stockQty < line.quantity && !input.isPreorder) {
       throw new Error(`Not enough stock for ${product.name}`)
     }
-    lines.push({
-      productId: product.id,
-      name: product.name,
-      price: product.price,
-      quantity: line.quantity,
-    })
+    lines.push(lineFromProduct(product, line.quantity))
   }
   if (!lines.length) throw new Error('Add at least one product')
 
@@ -164,6 +160,7 @@ export async function apiCreateOrder(
     location: input.location,
     fulfillment: input.fulfillment,
     scheduleDate: input.scheduleDate,
+    slotTime: input.slotTime || nowSlotTime(),
     items: lines,
     customization: input.customization,
     isPreorder: input.isPreorder,
@@ -189,17 +186,49 @@ export async function apiCreateOrder(
     await persistProductStock(nextProducts, products)
   }
 
-  const { data, error } = await getSupabase()
-    .from('pos_orders')
-    .insert(toDbOrderInsert(order))
-    .select('*')
-    .single()
+  let toSave = order
+  for (let attempt = 0; attempt < 8; attempt++) {
+    try {
+      const saved = await writeOrderRow(toSave, 'insert')
+      return { order: saved, products: nextProducts }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      const code = typeof err === 'object' && err && 'code' in err ? String((err as { code?: string }).code) : ''
+      if (code === '23505' || /duplicate key|unique constraint/i.test(message)) {
+        const n = Number(toSave.id.replace('POS-', '')) || 1000
+        toSave = { ...toSave, id: `POS-${n + 1}` }
+        continue
+      }
+      throw err
+    }
+  }
+  throw new Error('Could not allocate an order number')
+}
+
+async function writeOrderRow(order: PosOrder, mode: 'insert' | 'update') {
+  const sb = getSupabase()
+  const payload: Record<string, unknown> = {
+    ...toDbOrderInsert(order),
+    ...(mode === 'update' ? { updated_at: new Date().toISOString() } : {}),
+  }
+  const exec = (body: Record<string, unknown>) =>
+    mode === 'insert'
+      ? sb.from('pos_orders').insert(body).select('*').single()
+      : sb.from('pos_orders').update(body).eq('id', order.id).select('*').single()
+
+  let { data, error } = await exec(payload)
+  if (error && (error.code === '42703' || /slot_time|delivery_fee|schema cache/i.test(error.message))) {
+    const slim = { ...payload }
+    delete slim.slot_time
+    delete slim.delivery_fee
+    ;({ data, error } = await exec(slim))
+  }
   if (error) throw error
-  return { order: mapOrder(data as DbOrder), products: nextProducts }
+  return mapOrder(data as DbOrder)
 }
 
 export async function apiUpdateOrder(
-  id: string,
+  _id: string,
   patch: Partial<PosOrder>,
   historyText: string | undefined,
   actor: string,
@@ -221,17 +250,7 @@ export async function apiUpdateOrder(
       { at: new Date().toISOString(), by: actor, text: historyText },
     ]
   }
-  const { data, error } = await getSupabase()
-    .from('pos_orders')
-    .update({
-      ...toDbOrderInsert(next),
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', id)
-    .select('*')
-    .single()
-  if (error) throw error
-  return mapOrder(data as DbOrder)
+  return writeOrderRow(next, 'update')
 }
 
 export async function apiSetOrderStatus(

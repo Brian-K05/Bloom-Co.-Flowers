@@ -14,6 +14,13 @@ export type PosThemeId =
   | 'night-shift'
   | 'studio-grid'
 
+export type PosArrangementKind = 'bouquet' | 'box' | 'basket' | 'spray' | 'stand' | 'other'
+
+export type PosStemLine = {
+  name: string
+  qty: number
+}
+
 export type PosProduct = {
   id: string
   name: string
@@ -23,6 +30,14 @@ export type PosProduct = {
   available: boolean
   image: string
   isImported?: boolean
+  /** Peak-day tally: bouquet / box / basket / spray / stand */
+  kind?: PosArrangementKind
+  /** Bouquet stem count: 3, 6, 12, 18, 24 */
+  size?: number
+  /** Bouquet color for the tally grid */
+  color?: string
+  /** What’s inside, for the arranger pull list */
+  recipe?: PosStemLine[]
 }
 
 export type PosOrderItem = {
@@ -30,6 +45,10 @@ export type PosOrderItem = {
   name: string
   price: number
   quantity: number
+  kind?: PosArrangementKind
+  size?: number
+  color?: string
+  recipe?: PosStemLine[]
 }
 
 export type PosCustomization = {
@@ -58,6 +77,8 @@ export type PosOrder = {
   location: string
   fulfillment: PosFulfillment
   scheduleDate: string
+  /** Shop-floor slot, e.g. 07:00 — used for 6 am / 7 am filters */
+  slotTime: string
   items: PosOrderItem[]
   customization: PosCustomization
   isPreorder: boolean
@@ -93,6 +114,7 @@ export type PosOrderInput = {
   location: string
   fulfillment: PosFulfillment
   scheduleDate: string
+  slotTime?: string
   items: Array<{ productId: string; quantity: number }>
   customization: PosCustomization
   isPreorder: boolean

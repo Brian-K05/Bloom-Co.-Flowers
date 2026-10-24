@@ -20,6 +20,10 @@ create table public.pos_products (
   available boolean not null default true,
   image text not null,
   is_imported boolean not null default false,
+  kind text not null default 'other' check (kind in ('bouquet', 'box', 'basket', 'spray', 'stand', 'other')),
+  size integer null,
+  color text null,
+  recipe jsonb not null default '[]'::jsonb,
   updated_at timestamptz not null default now()
 );
 
@@ -37,6 +41,7 @@ create table public.pos_orders (
   location text not null,
   fulfillment text not null check (fulfillment in ('delivery', 'pickup')),
   schedule_date date not null,
+  slot_time text not null default '08:00',
   items jsonb not null default '[]'::jsonb,
   customization jsonb not null default '{}'::jsonb,
   is_preorder boolean not null default false,
@@ -143,15 +148,19 @@ begin
     ('wrapper-cello', 'wrapper', 'Clear cellophane', 4),
     ('wrapper-black', 'wrapper', 'Black matte', 5);
 
-  insert into public.pos_products (id, name, price, category, stock_qty, available, image, is_imported) values
-    ('classic-red-roses', 'Classic Red Roses', 1500, 'Roses', 40, true, 'https://images.unsplash.com/photo-1496062031456-07b8f162a322?auto=format&fit=crop&w=1200&q=80', false),
-    ('blush-romance', 'Blush Romance', 1800, 'Roses', 28, true, 'https://images.pexels.com/photos/736230/pexels-photo-736230.jpeg?auto=compress&cs=tinysrgb&w=1200', false),
-    ('white-elegance', 'White Elegance', 2000, 'Bouquets', 18, true, 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?auto=format&fit=crop&w=1200&q=80', false),
-    ('pastel-dreams', 'Pastel Dreams', 1650, 'Bouquets', 22, true, 'https://images.pexels.com/photos/931177/pexels-photo-931177.jpeg?auto=compress&cs=tinysrgb&w=1200', false),
-    ('imported-tulips', 'Dutch Tulip Bundle', 2800, 'Imported', 8, true, 'https://images.unsplash.com/photo-1494336877155-7fb9c6984f0a?auto=format&fit=crop&w=1200&q=80', true),
-    ('sweet-birthday', 'Sweet Birthday Bloom', 1450, 'Bouquets', 30, true, 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=1200&q=80', false),
-    ('love-grace', 'Love & Grace', 2200, 'Boxes', 12, true, 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1200&q=80', false),
-    ('orchid-accent', 'Orchid Accent', 3200, 'Imported', 0, false, 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=1200&q=80', true);
+  insert into public.pos_products (id, name, price, category, stock_qty, available, image, is_imported, kind, size, color, recipe) values
+    ('classic-red-roses', 'Classic Red Roses', 1500, 'Roses', 40, true, 'https://images.unsplash.com/photo-1496062031456-07b8f162a322?auto=format&fit=crop&w=1200&q=80', false, 'bouquet', 12, 'Red', '[{"name":"Red rose","qty":12}]'::jsonb),
+    ('blush-romance', 'Blush Romance', 1800, 'Roses', 28, true, 'https://images.pexels.com/photos/736230/pexels-photo-736230.jpeg?auto=compress&cs=tinysrgb&w=1200', false, 'bouquet', 12, 'Pink', '[{"name":"Pink rose","qty":5},{"name":"Lily","qty":2},{"name":"Yellow rose","qty":2}]'::jsonb),
+    ('white-elegance', 'White Elegance', 2000, 'Bouquets', 18, true, 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?auto=format&fit=crop&w=1200&q=80', false, 'bouquet', 12, 'White', '[{"name":"White rose","qty":10},{"name":"Baby''s breath","qty":1}]'::jsonb),
+    ('pastel-dreams', 'Pastel Dreams', 1650, 'Bouquets', 22, true, 'https://images.pexels.com/photos/931177/pexels-photo-931177.jpeg?auto=compress&cs=tinysrgb&w=1200', false, 'bouquet', 6, 'Pink', '[{"name":"Pink rose","qty":4},{"name":"White rose","qty":2}]'::jsonb),
+    ('imported-tulips', 'Dutch Tulip Bundle', 2800, 'Imported', 8, true, 'https://images.unsplash.com/photo-1494336877155-7fb9c6984f0a?auto=format&fit=crop&w=1200&q=80', true, 'bouquet', 12, 'Pink', '[{"name":"Tulip","qty":12}]'::jsonb),
+    ('sweet-birthday', 'Sweet Birthday Bloom', 1450, 'Bouquets', 30, true, 'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=1200&q=80', false, 'bouquet', 6, 'Red', '[{"name":"Red rose","qty":3},{"name":"Yellow rose","qty":3}]'::jsonb),
+    ('love-grace', 'Love & Grace', 2200, 'Boxes', 12, true, 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1200&q=80', false, 'box', null, null, '[{"name":"Red rose","qty":9}]'::jsonb),
+    ('orchid-accent', 'Orchid Accent', 3200, 'Imported', 0, false, 'https://images.unsplash.com/photo-1527061011665-3652c757a4d4?auto=format&fit=crop&w=1200&q=80', true, 'other', null, null, '[]'::jsonb),
+    ('bqt-3-red', 'Bouquet 3 Red', 350, 'Bouquets', 20, true, 'https://images.unsplash.com/photo-1496062031456-07b8f162a322?auto=format&fit=crop&w=1200&q=80', false, 'bouquet', 3, 'Red', '[{"name":"Red rose","qty":3}]'::jsonb),
+    ('stand-500', 'Funeral Stand ₱500', 500, 'Seasonal', 10, true, 'https://images.unsplash.com/photo-1487530811176-3780de880c2d?auto=format&fit=crop&w=1200&q=80', false, 'stand', null, null, '[{"name":"White chrysanthemum","qty":8},{"name":"Palm leaf","qty":4}]'::jsonb),
+    ('spray-800', 'Funeral Spray ₱800', 800, 'Seasonal', 8, true, 'https://images.pexels.com/photos/931177/pexels-photo-931177.jpeg?auto=compress&cs=tinysrgb&w=1200', false, 'spray', null, null, '[{"name":"White chrysanthemum","qty":12},{"name":"Lily","qty":3}]'::jsonb),
+    ('basket-350', 'Sympathy Basket ₱350', 350, 'Boxes', 14, true, 'https://images.unsplash.com/photo-1591886960571-74d43a9d4166?auto=format&fit=crop&w=1200&q=80', false, 'basket', null, null, '[{"name":"Mixed seasonal","qty":6}]'::jsonb);
 
   insert into public.pos_articles (id, title, category, body) values
     ('rose-red', 'Red roses', 'flower', 'Classic symbol of deep romantic love and passion. Best for anniversaries, Valentine’s, and serious gestures.'),
@@ -163,15 +172,15 @@ begin
   insert into public.pos_orders (
     id, created_at, source, status,
     customer_name, customer_phone, recipient_name, recipient_phone,
-    location, fulfillment, schedule_date, items, customization,
+    location, fulfillment, schedule_date, slot_time, items, customization,
     is_preorder, supplier_note, reminder_due, reminder_done, history,
     subtotal, delivery_fee, total, stock_applied
   ) values
   (
     'POS-1001', now(), 'messenger', 'paid',
     'Isabelle Cruz', '+63 917 555 1024', 'Marco Cruz', '+63 918 555 2200',
-    'Makati – Poblacion', 'delivery', current_date,
-    '[{"productId":"classic-red-roses","name":"Classic Red Roses","price":1500,"quantity":1}]'::jsonb,
+    'Makati – Poblacion', 'delivery', current_date, '07:00',
+    '[{"productId":"classic-red-roses","name":"Classic Red Roses","price":1500,"quantity":1,"kind":"bouquet","size":12,"color":"Red","recipe":[{"name":"Red rose","qty":12}]}]'::jsonb,
     '{"ribbon":"Pink","wrapper":"Ivory tissue","cardMessage":"Happy anniversary — forever yours.","addOns":"","notes":"From Messenger chat this morning"}'::jsonb,
     false, '', null, false,
     jsonb_build_array(
@@ -183,8 +192,8 @@ begin
   (
     'POS-1002', now(), 'messenger', 'not_paid',
     'Lara Mendoza', '+63 927 111 8899', 'Lara Mendoza', '+63 927 111 8899',
-    'Studio Pickup', 'pickup', (current_date + 1),
-    '[{"productId":"imported-tulips","name":"Dutch Tulip Bundle","price":2800,"quantity":1}]'::jsonb,
+    'Studio Pickup', 'pickup', (current_date + 1), '10:00',
+    '[{"productId":"imported-tulips","name":"Dutch Tulip Bundle","price":2800,"quantity":1,"kind":"bouquet","size":12,"color":"Pink","recipe":[{"name":"Tulip","qty":12}]}]'::jsonb,
     '{"ribbon":"Sage","wrapper":"Kraft","cardMessage":"","addOns":"Baby’s breath","notes":"Customer asked about tulip meaning"}'::jsonb,
     true, 'Need to confirm tulip shipment with importer', (current_date + 1), false,
     jsonb_build_array(
@@ -195,8 +204,8 @@ begin
   (
     'POS-1003', now(), 'walk-in', 'partial',
     'Walk-in Guest', '+63 900 000 0000', 'Sofia Reyes', '+63 916 222 3344',
-    'San Jose', 'delivery', current_date,
-    '[{"productId":"pastel-dreams","name":"Pastel Dreams","price":1650,"quantity":1},{"productId":"sweet-birthday","name":"Sweet Birthday Bloom","price":1450,"quantity":1}]'::jsonb,
+    'San Jose', 'delivery', current_date, '08:00',
+    '[{"productId":"pastel-dreams","name":"Pastel Dreams","price":1650,"quantity":1,"kind":"bouquet","size":6,"color":"Pink","recipe":[{"name":"Pink rose","qty":4},{"name":"White rose","qty":2}]},{"productId":"sweet-birthday","name":"Sweet Birthday Bloom","price":1450,"quantity":1,"kind":"bouquet","size":6,"color":"Red","recipe":[{"name":"Red rose","qty":3},{"name":"Yellow rose","qty":3}]}]'::jsonb,
     '{"ribbon":"Yellow","wrapper":"Blush wrap","cardMessage":"Happy Birthday!","addOns":"","notes":""}'::jsonb,
     false, '', null, false,
     jsonb_build_array(

@@ -32,18 +32,18 @@ html[data-pos-theme] {
 }
 
 html[data-pos-theme='counter-clear'] {
-  --pos-bg: #f7f8f5;
+  --pos-bg: #e8efe9;
   --pos-surface: #ffffff;
-  --pos-ink: #2e3a2f;
+  --pos-ink: #24312a;
   --pos-muted: #6b756c;
-  --pos-accent: #7fa37a;
-  --pos-accent-ink: #ffffff;
-  --pos-accent-soft: #e4eee2;
-  --pos-line: #e3e8e1;
-  --pos-chip: #eef2ee;
-  --pos-rail: #ffffff;
-  --pos-rail-ink: #2e3a2f;
-  --pos-radius: 12px;
+  --pos-accent: #c5d8c4;
+  --pos-accent-ink: #1e2c22;
+  --pos-accent-soft: #dce8db;
+  --pos-line: #dde6dc;
+  --pos-chip: #eef3ee;
+  --pos-rail: #f4f1ea;
+  --pos-rail-ink: #24312a;
+  --pos-radius: 16px;
   --pos-font: "Inter", "Segoe UI", sans-serif;
   --pos-display: "Inter", "Segoe UI", sans-serif;
   --pos-mono: "Roboto Mono", ui-monospace, monospace;

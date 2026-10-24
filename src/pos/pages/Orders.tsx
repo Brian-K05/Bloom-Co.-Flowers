@@ -1,10 +1,19 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import {
+  ARRANGEMENT_KINDS,
+  PRICE_BUCKETS,
+  SLOT_HOURS,
+  arrangementLabel,
+  hourLabel,
+  nearestPriceBucket,
+  parseSlotHour,
+} from '../lib/catalog'
 import { usePosTheme } from '../PosThemeProvider'
 import { OrderLogTable } from '../components/OrderLogTable'
 import { StatusBadge, statusLabel } from '../components/StatusBadge'
 import { usePos } from '../store/PosContext'
-import type { PosOrderSource, PosOrderStatus } from '../types'
+import type { PosArrangementKind, PosOrderSource, PosOrderStatus } from '../types'
 
 const boardColumns: PosOrderStatus[] = ['not_paid', 'paid', 'partial', 'cancelled']
 
@@ -33,7 +42,13 @@ export function PosOrdersPage() {
   const [productId, setProductId] = useState('all')
   const [category, setCategory] = useState('all')
   const [color, setColor] = useState('all')
+  const [hour, setHour] = useState('all')
+  const [kind, setKind] = useState<'all' | PosArrangementKind>('all')
+  const [priceBucket, setPriceBucket] = useState('all')
+  const [query, setQuery] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [params] = useSearchParams()
+  const highlightId = params.get('highlight') ?? undefined
 
   const categories = useMemo(
     () => [...new Set(products.map((p) => p.category))].sort((a, b) => a.localeCompare(b)),
@@ -52,9 +67,34 @@ export function PosOrdersPage() {
         if (!byProduct) return false
       }
       if (color !== 'all' && !orderMatchesColor(order, color)) return false
+      if (hour !== 'all' && parseSlotHour(order.slotTime, order.createdAt) !== Number(hour)) return false
+      if (kind !== 'all' && !order.items.some((i) => (i.kind ?? getProduct(i.productId)?.kind) === kind)) return false
+      if (priceBucket !== 'all') {
+        const bucket = Number(priceBucket)
+        if (!order.items.some((i) => nearestPriceBucket(i.price) === bucket)) return false
+      }
+      if (query.trim()) {
+        const q = query.trim().toLowerCase()
+        const hay = [
+          order.id,
+          order.customerName,
+          order.customerPhone,
+          order.recipientName,
+          ...order.items.map((i) => i.name),
+        ]
+          .join(' ')
+          .toLowerCase()
+        if (!hay.includes(q)) return false
+      }
       return true
     })
-  }, [category, color, date, getProduct, location, orders, productId, source, status])
+  }, [category, color, date, getProduct, hour, kind, location, orders, priceBucket, productId, query, source, status])
+
+  const scheduleCaption = useMemo(() => {
+    if (!date) return 'All scheduled dates'
+    const d = new Date(`${date}T00:00:00`)
+    return d.toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric' })
+  }, [date])
 
   const filters = (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -87,6 +127,27 @@ export function PosOrdersPage() {
             </option>
           ))}
         </select>
+      </label>
+      <label className="pos-label">
+        Time slot
+        <select className="pos-field mt-1" value={hour} onChange={(e) => setHour(e.target.value)}>
+          <option value="all">All</option>
+          {SLOT_HOURS.map((h) => (
+            <option key={h} value={String(h)}>
+              {hourLabel(h)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="pos-label sm:col-span-2">
+        Search order / customer
+        <input
+          type="search"
+          className="pos-field mt-1"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Order no., customer, phone or Messenger…"
+        />
       </label>
       <label className="pos-label">
         Source
@@ -134,6 +195,32 @@ export function PosOrdersPage() {
           ))}
         </select>
       </label>
+      <label className="pos-label">
+        Arrangement
+        <select
+          className="pos-field mt-1"
+          value={kind}
+          onChange={(e) => setKind(e.target.value as typeof kind)}
+        >
+          <option value="all">All</option>
+          {ARRANGEMENT_KINDS.map((k) => (
+            <option key={k} value={k}>
+              {arrangementLabel(k)}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="pos-label">
+        Price
+        <select className="pos-field mt-1" value={priceBucket} onChange={(e) => setPriceBucket(e.target.value)}>
+          <option value="all">All</option>
+          {PRICE_BUCKETS.map((p) => (
+            <option key={p} value={String(p)}>
+              ₱{p}
+            </option>
+          ))}
+        </select>
+      </label>
     </div>
   )
 
@@ -145,7 +232,7 @@ export function PosOrdersPage() {
           <p className="mt-1 text-sm" style={{ color: 'var(--pos-muted)' }}>
             {theme.layout === 'kanban'
               ? 'War-room board — scan by payment for peak-day prep.'
-              : 'Filter by date, location, payment, product, flower type, or color.'}
+              : 'Manage and monitor daily customer orders'}
           </p>
         </div>
         <button
@@ -159,9 +246,16 @@ export function PosOrdersPage() {
 
       <div className={`pos-surface mt-6 p-4 ${filtersOpen ? 'block' : 'hidden sm:block'}`}>{filters}</div>
 
-      <p className="mt-4 text-sm" style={{ color: 'var(--pos-muted)' }}>
-        {filtered.length} order{filtered.length === 1 ? '' : 's'}
-      </p>
+      <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
+        <p className="font-semibold">Schedule</p>
+        <span
+          className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
+          style={{ background: 'var(--pos-accent-soft)', color: 'var(--pos-accent-ink)' }}
+        >
+          {filtered.length} visible
+        </span>
+        <span style={{ color: 'var(--pos-muted)' }}>| {scheduleCaption}</span>
+      </div>
 
       {theme.layout === 'kanban' ? (
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -218,6 +312,7 @@ export function PosOrdersPage() {
             orders={filtered}
             emptyMessage="No orders match these filters."
             linkPrefix="/admin/orders"
+            highlightId={highlightId}
           />
         </div>
       )}

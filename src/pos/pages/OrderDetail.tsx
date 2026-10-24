@@ -58,20 +58,24 @@ function OrderDetailView({ order }: { order: PosOrder }) {
   }
 
   async function saveCustomization() {
-    await updateOrder(
-      order.id,
-      {
-        customization: {
-          ...order.customization,
-          ribbon,
-          wrapper,
-          cardMessage,
+    try {
+      await updateOrder(
+        order.id,
+        {
+          customization: {
+            ...order.customization,
+            ribbon,
+            wrapper,
+            cardMessage,
+          },
         },
-      },
-      'Customization updated',
-    )
-    notify('Customization saved — opening calendar')
-    goToCalendar()
+        'Customization updated',
+      )
+      notify('Customization saved — opening calendar')
+      goToCalendar()
+    } catch (err) {
+      notify(err instanceof Error ? err.message : 'Could not save customization')
+    }
   }
 
   async function saveDeliveryFee() {

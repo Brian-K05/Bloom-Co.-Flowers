@@ -286,8 +286,8 @@ export function PosShell() {
               </button>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold lg:hidden">Bloom Desk · {theme.name}</p>
-                <p className="hidden text-xs lg:block" style={{ color: 'var(--pos-muted)' }}>
-                  Messenger orders encoded here · Meta automation is Phase 2
+                <p className="hidden text-sm lg:block" style={{ color: 'var(--pos-muted)' }}>
+                  Bloom Desk
                 </p>
               </div>
               <label className="hidden items-center gap-2 text-xs sm:flex" style={{ color: 'var(--pos-muted)' }}>
@@ -337,9 +337,11 @@ export function PosShell() {
                 </button>
               </div>
             ) : null}
-            <p className="mb-4 text-[11px] uppercase tracking-[0.14em]" style={{ color: 'var(--pos-muted)' }}>
-              Data: {backend === 'supabase' ? 'Supabase (seeded catalog)' : 'localStorage fallback — set VITE_SUPABASE_* for live DB'}
-            </p>
+            {backend !== 'supabase' ? (
+              <p className="mb-4 text-sm" style={{ color: 'var(--pos-muted)' }}>
+                Working offline on this computer until the shop database is connected.
+              </p>
+            ) : null}
             {backend === 'supabase' && ready && !loading && products.length === 0 ? (
               <div
                 className="pos-surface mb-4 p-4 text-sm"

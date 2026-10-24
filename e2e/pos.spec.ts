@@ -17,7 +17,7 @@ test.describe('Track B POS', () => {
   test('demo login reaches dashboard', async ({ page }) => {
     await login(page)
     await expect(page.getByRole('heading', { name: /good (morning|afternoon|evening)/i })).toBeVisible()
-    await expect(page.getByText(/Data:\s*(Supabase|localStorage)/i)).toBeVisible()
+    await expect(page.getByRole('heading', { name: /today’s orders|today's orders/i })).toBeVisible()
   })
 
   test('desktop sidebar is sticky and does not scroll away', async ({ page }) => {
@@ -82,12 +82,13 @@ test.describe('Track B POS', () => {
     await expect(page.getByLabel('Schedule date')).toBeVisible()
     await expect(page.getByLabel('Location')).toBeVisible()
     await expect(page.getByLabel('Payment status')).toBeVisible()
-    await expect(page.getByLabel('Source')).toBeVisible()
-    await expect(page.getByLabel('Product')).toBeVisible()
-    await expect(page.getByLabel('Flower type / category')).toBeVisible()
-    await expect(page.getByLabel('Color')).toBeVisible()
     await expect(page.getByLabel('Time slot')).toBeVisible()
     await expect(page.getByLabel('Search order / customer')).toBeVisible()
+    await expect(page.getByLabel('Flower type / category')).toBeVisible()
+    await page.getByRole('button', { name: /more filters/i }).click()
+    await expect(page.getByLabel('Source')).toBeVisible()
+    await expect(page.getByLabel('Product')).toBeVisible()
+    await expect(page.getByLabel('Color')).toBeVisible()
     await expect(page.getByLabel('Arrangement')).toBeVisible()
     await expect(page.getByLabel('Price')).toBeVisible()
 

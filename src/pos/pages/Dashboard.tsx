@@ -33,15 +33,12 @@ export function PosDashboardPage() {
     <div>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: 'var(--pos-muted)' }}>
-            {theme.name}
-          </p>
-          <h1 className="mt-1 text-3xl sm:text-4xl">
+          <h1 className="text-3xl sm:text-4xl">
             {greeting}
             {user?.displayName ? `, ${user.displayName.split(' ')[0]}` : ''}
           </h1>
-          <p className="mt-2 max-w-xl text-sm" style={{ color: 'var(--pos-muted)' }}>
-            Encode Messenger orders here so stock, calendar, and money stay in sync.
+          <p className="mt-2 max-w-xl text-base" style={{ color: 'var(--pos-muted)' }}>
+            Today’s list is on this page. Use New order when a customer is ready.
           </p>
         </div>
         <button
@@ -115,22 +112,23 @@ export function PosDashboardPage() {
           </div>
         </section>
       ) : (
-        <section className="mt-10 grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-          <div className="pos-surface overflow-hidden">
+        <section className="mt-8 space-y-4">
+          <div className="pos-surface min-w-0">
             <div className="flex items-center justify-between gap-3 border-b px-5 py-4" style={{ borderColor: 'var(--pos-line)' }}>
               <h2 className="text-xl">Today’s orders</h2>
-              <Link to="/admin/orders" className="text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--pos-accent)' }}>
+              <Link to="/admin/orders" className="text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: 'var(--pos-muted)' }}>
                 View all
               </Link>
             </div>
             <OrderLogTable
               orders={todayOrders.slice(0, 8)}
-              emptyMessage="No orders scheduled today yet. Encode from Messenger when a chat closes."
+              emptyMessage="No orders for today yet. Tap New order when a chat is ready."
               linkPrefix="/admin/orders"
+              variant="today"
             />
           </div>
 
-          <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="pos-surface p-5">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg">Low stock</h2>

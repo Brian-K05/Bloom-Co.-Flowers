@@ -1,4 +1,4 @@
-import type { PosFulfillment, PosOrderStatus } from '../types'
+import type { PosFulfillment, PosOrder, PosOrderStatus } from '../types'
 
 const labels: Record<PosOrderStatus, string> = {
   not_paid: 'Not paid',
@@ -64,6 +64,37 @@ export function FulfillmentBadge({ fulfillment }: { fulfillment: PosFulfillment 
   )
 }
 
+function shortLocation(location: string) {
+  const part = location.split(/[–—-]/).pop()?.trim()
+  return (part || location).toUpperCase()
+}
+
+export function Chip({ children }: { children: string }) {
+  return (
+    <span
+      className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]"
+      style={{ background: 'var(--pos-chip)', color: 'var(--pos-ink)' }}
+    >
+      {children}
+    </span>
+  )
+}
+
+/** Payment + place + pickup/delivery, then a plain-language note. */
+export function StatusRemarks({ order }: { order: PosOrder }) {
+  const note = [order.customization.notes, order.customization.addOns].filter(Boolean)[0]
+  return (
+    <div className="space-y-1.5 text-xs" data-testid="order-remarks">
+      <div className="flex flex-wrap gap-1.5">
+        <StatusBadge status={order.status} />
+        {order.location ? <Chip>{shortLocation(order.location)}</Chip> : null}
+        <FulfillmentBadge fulfillment={order.fulfillment} />
+      </div>
+      {note ? <p style={{ color: 'var(--pos-muted)' }}>{note}</p> : null}
+    </div>
+  )
+}
+
 /** Word-log style remarks: payment + pickup/delivery (+ optional location). */
 export function RemarksBlock({
   status,
@@ -80,13 +111,9 @@ export function RemarksBlock({
     <div className={compact ? 'space-y-0.5 text-xs' : 'space-y-1 text-sm'} data-testid="order-remarks">
       <div className="flex flex-wrap gap-1.5">
         <StatusBadge status={status} />
+        {location ? <Chip>{shortLocation(location)}</Chip> : null}
         <FulfillmentBadge fulfillment={fulfillment} />
       </div>
-      {location ? (
-        <p style={{ color: 'var(--pos-muted)' }} className={compact ? 'text-[11px]' : 'text-xs'}>
-          {location}
-        </p>
-      ) : null}
     </div>
   )
 }

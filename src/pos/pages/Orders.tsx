@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { formatPHP } from '../../lib/format'
 import {
   ARRANGEMENT_KINDS,
   PRICE_BUCKETS,
   SLOT_HOURS,
   arrangementLabel,
+  formatRecipe,
+  formatSlotTime,
   hourLabel,
   nearestPriceBucket,
   parseSlotHour,
@@ -47,6 +50,7 @@ export function PosOrdersPage() {
   const [priceBucket, setPriceBucket] = useState('all')
   const [query, setQuery] = useState('')
   const [filtersOpen, setFiltersOpen] = useState(false)
+  const [moreFilters, setMoreFilters] = useState(false)
   const [params] = useSearchParams()
   const highlightId = params.get('highlight') ?? undefined
 
@@ -96,8 +100,40 @@ export function PosOrdersPage() {
     return d.toLocaleDateString('en-PH', { weekday: 'long', month: 'long', day: 'numeric' })
   }, [date])
 
+  const scheduledValue = filtered.reduce((sum, order) => sum + order.total, 0)
+
+  function exportList() {
+    const rows = [
+      ['Order no.', 'Time', 'Customer', 'Phone', 'Order', 'Amount', 'Payment', 'Pickup or delivery', 'Place', 'Notes'],
+      ...filtered.map((order) => [
+        order.id.replace(/^POS-/, '#'),
+        formatSlotTime(order.slotTime, order.createdAt),
+        order.customerName,
+        order.customerPhone,
+        order.items
+          .map((item) => `${item.name}${item.recipe?.length ? ` (${formatRecipe(item.recipe)})` : ''}`)
+          .join('; '),
+        String(order.total),
+        statusLabel(order.status),
+        order.fulfillment === 'delivery' ? 'Delivery' : 'Pickup',
+        order.location,
+        order.customization.notes,
+      ]),
+    ]
+    const csv = rows
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `bloom-desk-orders${date ? `-${date}` : ''}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const filters = (
-    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <label className="pos-label">
         Schedule date
         <input type="date" className="pos-field mt-1" value={date} onChange={(e) => setDate(e.target.value)} />
@@ -146,32 +182,8 @@ export function PosOrdersPage() {
           className="pos-field mt-1"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Order no., customer, phone or Messenger…"
+          placeholder="Name, phone, or order number"
         />
-      </label>
-      <label className="pos-label">
-        Source
-        <select
-          className="pos-field mt-1"
-          value={source}
-          onChange={(e) => setSource(e.target.value as typeof source)}
-        >
-          <option value="all">All</option>
-          <option value="messenger">Messenger</option>
-          <option value="walk-in">Walk-in</option>
-          <option value="call">Call</option>
-        </select>
-      </label>
-      <label className="pos-label">
-        Product
-        <select className="pos-field mt-1" value={productId} onChange={(e) => setProductId(e.target.value)}>
-          <option value="all">All</option>
-          {products.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
       </label>
       <label className="pos-label">
         Flower type / category
@@ -184,43 +196,76 @@ export function PosOrdersPage() {
           ))}
         </select>
       </label>
-      <label className="pos-label">
-        Color
-        <select className="pos-field mt-1" value={color} onChange={(e) => setColor(e.target.value)}>
-          <option value="all">All</option>
-          {COLOR_FILTERS.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="pos-label">
-        Arrangement
-        <select
-          className="pos-field mt-1"
-          value={kind}
-          onChange={(e) => setKind(e.target.value as typeof kind)}
-        >
-          <option value="all">All</option>
-          {ARRANGEMENT_KINDS.map((k) => (
-            <option key={k} value={k}>
-              {arrangementLabel(k)}
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="pos-label">
-        Price
-        <select className="pos-field mt-1" value={priceBucket} onChange={(e) => setPriceBucket(e.target.value)}>
-          <option value="all">All</option>
-          {PRICE_BUCKETS.map((p) => (
-            <option key={p} value={String(p)}>
-              ₱{p}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="flex items-end">
+        <button type="button" className="pos-btn pos-btn-secondary w-full" onClick={() => setMoreFilters((v) => !v)}>
+          {moreFilters ? 'Hide extra filters' : 'More filters'}
+        </button>
+      </div>
+      {moreFilters ? (
+        <>
+          <label className="pos-label">
+            Source
+            <select
+              className="pos-field mt-1"
+              value={source}
+              onChange={(e) => setSource(e.target.value as typeof source)}
+            >
+              <option value="all">All</option>
+              <option value="messenger">Messenger</option>
+              <option value="walk-in">Walk-in</option>
+              <option value="call">Call</option>
+            </select>
+          </label>
+          <label className="pos-label">
+            Product
+            <select className="pos-field mt-1" value={productId} onChange={(e) => setProductId(e.target.value)}>
+              <option value="all">All</option>
+              {products.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="pos-label">
+            Color
+            <select className="pos-field mt-1" value={color} onChange={(e) => setColor(e.target.value)}>
+              <option value="all">All</option>
+              {COLOR_FILTERS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="pos-label">
+            Arrangement
+            <select
+              className="pos-field mt-1"
+              value={kind}
+              onChange={(e) => setKind(e.target.value as typeof kind)}
+            >
+              <option value="all">All</option>
+              {ARRANGEMENT_KINDS.map((k) => (
+                <option key={k} value={k}>
+                  {arrangementLabel(k)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="pos-label">
+            Price
+            <select className="pos-field mt-1" value={priceBucket} onChange={(e) => setPriceBucket(e.target.value)}>
+              <option value="all">All</option>
+              {PRICE_BUCKETS.map((p) => (
+                <option key={p} value={String(p)}>
+                  ₱{p}
+                </option>
+              ))}
+            </select>
+          </label>
+        </>
+      ) : null}
     </div>
   )
 
@@ -229,10 +274,10 @@ export function PosOrdersPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-3xl">Orders</h1>
-          <p className="mt-1 text-sm" style={{ color: 'var(--pos-muted)' }}>
+          <p className="mt-1 text-base" style={{ color: 'var(--pos-muted)' }}>
             {theme.layout === 'kanban'
-              ? 'War-room board — scan by payment for peak-day prep.'
-              : 'Manage and monitor daily customer orders'}
+              ? 'Tap a card to open the order.'
+              : 'Find an order by date, name, or phone. Big print, one row each.'}
           </p>
         </div>
         <button
@@ -246,16 +291,33 @@ export function PosOrdersPage() {
 
       <div className={`pos-surface mt-6 p-4 ${filtersOpen ? 'block' : 'hidden sm:block'}`}>{filters}</div>
 
-      <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
-        <p className="font-semibold">Schedule</p>
-        <span
-          className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-          style={{ background: 'var(--pos-accent-soft)', color: 'var(--pos-accent-ink)' }}
+      <div className="pos-surface mt-5 min-w-0">
+        <div
+          className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-3 text-sm"
+          style={{ borderColor: 'var(--pos-line)' }}
         >
-          {filtered.length} visible
-        </span>
-        <span style={{ color: 'var(--pos-muted)' }}>| {scheduleCaption}</span>
-      </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="font-semibold">Schedule</p>
+            <span
+              className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
+              style={{ background: 'var(--pos-accent-soft)', color: 'var(--pos-accent-ink)' }}
+            >
+              {filtered.length} visible
+            </span>
+            <span style={{ color: 'var(--pos-muted)' }}>| {scheduleCaption}</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-3" style={{ color: 'var(--pos-muted)' }}>
+            <span>
+              {filtered.length} order{filtered.length === 1 ? '' : 's'}
+            </span>
+            <span className="font-semibold" style={{ color: 'var(--pos-ink)' }}>
+              {formatPHP(scheduledValue)} scheduled value
+            </span>
+            <button type="button" className="pos-btn pos-btn-secondary !min-h-8 !px-3 text-xs" onClick={exportList}>
+              Export list
+            </button>
+          </div>
+        </div>
 
       {theme.layout === 'kanban' ? (
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -307,15 +369,14 @@ export function PosOrdersPage() {
           })}
         </div>
       ) : (
-        <div className="pos-surface mt-4 overflow-hidden">
-          <OrderLogTable
-            orders={filtered}
-            emptyMessage="No orders match these filters."
-            linkPrefix="/admin/orders"
-            highlightId={highlightId}
-          />
-        </div>
+        <OrderLogTable
+          orders={filtered}
+          emptyMessage="No orders match these filters."
+          linkPrefix="/admin/orders"
+          highlightId={highlightId}
+        />
       )}
+      </div>
     </div>
   )
 }

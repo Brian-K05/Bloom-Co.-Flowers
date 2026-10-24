@@ -316,7 +316,7 @@ export function PosShell() {
           </header>
 
           <main
-            className={`page-enter min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8 ${isSplit ? 'max-w-[1400px]' : ''} ${isSoft ? 'sm:px-8' : ''}`}
+            className={`page-enter min-w-0 flex-1 px-3 py-5 sm:px-4 lg:px-5 ${isSoft ? 'sm:px-6' : ''}`}
             key={location.pathname}
           >
             {loading && !ready ? (

@@ -124,7 +124,6 @@ export function PosDashboardPage() {
               orders={todayOrders.slice(0, 8)}
               emptyMessage="No orders for today yet. Tap New order when a chat is ready."
               linkPrefix="/admin/orders"
-              variant="today"
             />
           </div>
 

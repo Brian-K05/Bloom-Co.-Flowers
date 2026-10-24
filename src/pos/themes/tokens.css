@@ -147,6 +147,33 @@ html[data-pos-theme='studio-grid'] {
   border-radius: var(--pos-radius);
 }
 
+.pos-sheet {
+  border-collapse: collapse;
+}
+
+.pos-sheet th,
+.pos-sheet td {
+  border: 1px solid var(--pos-line);
+  background: var(--pos-surface);
+}
+
+.pos-sheet thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: color-mix(in oklab, var(--pos-bg) 55%, var(--pos-surface));
+}
+
+.pos-sheet .pos-sheet-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.pos-sheet thead .pos-sheet-sticky {
+  z-index: 3;
+}
+
 .pos-btn {
   display: inline-flex;
   align-items: center;

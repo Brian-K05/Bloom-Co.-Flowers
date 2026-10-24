@@ -277,7 +277,7 @@ export function PosOrdersPage() {
           <p className="mt-1 text-base" style={{ color: 'var(--pos-muted)' }}>
             {theme.layout === 'kanban'
               ? 'Tap a card to open the order.'
-              : 'Find an order by date, name, or phone. Big print, one row each.'}
+              : 'Spreadsheet of today’s work — slide sideways to see amount and remarks.'}
           </p>
         </div>
         <button

@@ -19,7 +19,7 @@ function Breakdown({ order }: { order: PosOrder }) {
   const extras = [order.customization.addOns, order.customization.cardMessage ? 'Message card' : ''].filter(Boolean)
 
   return (
-    <ul className="space-y-1 text-[13px] leading-snug">
+    <ul className="space-y-0.5 text-[13px] leading-snug">
       {order.items.map((item) => (
         <li key={`${order.id}-${item.productId}`}>
           <p className="flex gap-2 font-semibold">
@@ -52,25 +52,19 @@ function Breakdown({ order }: { order: PosOrder }) {
 
 function MoneyBlock({ order }: { order: PosOrder }) {
   return (
-    <div className="min-w-[10rem] text-[13px]">
-      <div className="flex justify-between gap-8" style={{ color: 'var(--pos-muted)' }}>
+    <div className="ml-auto w-[9.5rem] text-[13px]">
+      <div className="flex justify-between gap-3" style={{ color: 'var(--pos-muted)' }}>
         <span>Flowers</span>
         <span>{formatPHP(order.subtotal)}</span>
       </div>
       {order.deliveryFee > 0 ? (
-        <div className="mt-0.5 flex justify-between gap-8" style={{ color: 'var(--pos-muted)' }}>
+        <div className="mt-0.5 flex justify-between gap-3" style={{ color: 'var(--pos-muted)' }}>
           <span>Delivery</span>
           <span>{formatPHP(order.deliveryFee)}</span>
         </div>
       ) : null}
-      {order.customization.cardMessage ? (
-        <div className="mt-0.5 flex justify-between gap-8" style={{ color: 'var(--pos-muted)' }}>
-          <span>Card</span>
-          <span>—</span>
-        </div>
-      ) : null}
       <div
-        className="mt-1.5 flex justify-between gap-8 border-t pt-1.5 font-semibold"
+        className="mt-1 flex justify-between gap-3 border-t pt-1 font-semibold"
         style={{ borderColor: 'var(--pos-line)' }}
       >
         <span>Total</span>
@@ -94,33 +88,28 @@ export function OrderLogTable({
 }) {
   return (
     <div data-testid="order-log-table" className="min-w-0">
-      <p className="px-4 pt-2 text-xs md:hidden" style={{ color: 'var(--pos-muted)' }}>
-        On a bigger screen this opens like a spreadsheet with every column.
-      </p>
-      <div className="hidden max-h-[70vh] overflow-auto md:block">
-        <table className="pos-sheet w-full min-w-[1280px] text-left">
+      <div className="hidden overflow-x-auto md:block">
+        <table className="pos-sheet text-left">
           <colgroup>
-            <col style={{ width: '7.5rem' }} />
-            <col style={{ width: '8.5rem' }} />
-            <col style={{ width: '14rem' }} />
-            <col />
-            <col style={{ width: '12rem' }} />
-            <col style={{ width: '14rem' }} />
+            <col style={{ width: '11%' }} />
+            <col style={{ width: '12%' }} />
+            <col style={{ width: '18%' }} />
+            <col style={{ width: '24%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '20%' }} />
           </colgroup>
           <thead style={{ color: 'var(--pos-muted)' }}>
             <tr>
-              <th className="pos-sheet-sticky px-3 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">
-                Order no.
-              </th>
-              <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">Time slot</th>
-              <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">Customer</th>
-              <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">Order no.</th>
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">Time slot</th>
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">Customer</th>
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">
                 Full order breakdown
               </th>
-              <th className="px-3 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.12em]">
+              <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-[0.12em]">
                 Total amount
               </th>
-              <th className="px-3 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">Status / remarks</th>
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.12em]">Status / remarks</th>
             </tr>
           </thead>
           <tbody>
@@ -132,16 +121,16 @@ export function OrderLogTable({
                   background: highlightId === order.id ? 'var(--pos-accent-soft)' : undefined,
                 }}
               >
-                <td className="pos-sheet-sticky px-3 py-3">
-                  <Link to={`${linkPrefix}/${order.id}`} className="text-[15px] font-semibold hover:underline">
+                <td className="px-4 py-3.5">
+                  <Link to={`${linkPrefix}/${order.id}`} className="text-sm font-semibold hover:underline">
                     #{orderNo(order.id)}
                   </Link>
                   <p className="mt-0.5 text-xs" style={{ color: 'var(--pos-muted)' }}>
                     {sourceChannelLabel(order.source)}
                   </p>
                 </td>
-                <td className="px-3 py-3 whitespace-nowrap">
-                  <p className="text-[15px] font-semibold">{formatSlotTime(order.slotTime, order.createdAt)}</p>
+                <td className="px-4 py-3.5 whitespace-nowrap">
+                  <p className="text-sm font-semibold">{formatSlotTime(order.slotTime, order.createdAt)}</p>
                   {order.status !== 'cancelled' ? (
                     <p className="mt-1 flex items-center gap-1.5 text-xs" style={{ color: '#2f7a45' }}>
                       <span className="h-1.5 w-1.5 rounded-full bg-[#2f7a45]" />
@@ -153,8 +142,8 @@ export function OrderLogTable({
                     </p>
                   )}
                 </td>
-                <td className="px-3 py-3">
-                  <p className="text-[15px] font-semibold">{order.customerName}</p>
+                <td className="px-4 py-3.5">
+                  <p className="text-sm font-semibold">{order.customerName}</p>
                   {order.customerPhone ? (
                     <p className="text-xs" style={{ color: 'var(--pos-muted)' }}>
                       {order.customerPhone}
@@ -162,20 +151,20 @@ export function OrderLogTable({
                   ) : null}
                   {order.source === 'messenger' ? (
                     <p
-                      className="mt-1.5 inline-flex rounded-full px-2 py-0.5 text-[11px]"
+                      className="mt-1 inline-flex max-w-full truncate rounded-full px-2 py-0.5 text-[11px]"
                       style={{ background: 'var(--pos-chip)', color: 'var(--pos-muted)' }}
                     >
                       Messenger · {messengerHandle(order.customerName)}
                     </p>
                   ) : null}
                 </td>
-                <td className="px-3 py-3">
+                <td className="px-4 py-3.5">
                   <Breakdown order={order} />
                 </td>
-                <td className="px-3 py-3 text-right">
+                <td className="px-4 py-3.5">
                   <MoneyBlock order={order} />
                 </td>
-                <td className="px-3 py-3">
+                <td className="px-4 py-3.5">
                   <StatusRemarks order={order} />
                 </td>
               </tr>

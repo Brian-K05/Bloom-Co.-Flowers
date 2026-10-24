@@ -38,7 +38,7 @@ export function StatusBadge({ status }: { status: PosOrderStatus }) {
   return (
     <span
       data-status-badge
-      className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]"
+      className="inline-flex shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em]"
       style={{
         background: tone.bg,
         color: tone.ink,
@@ -53,7 +53,7 @@ export function FulfillmentBadge({ fulfillment }: { fulfillment: PosFulfillment 
   return (
     <span
       data-fulfillment-badge
-      className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]"
+      className="inline-flex shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em]"
       style={{
         background: 'var(--pos-status-ready)',
         color: 'var(--pos-status-ready-ink)',
@@ -65,14 +65,13 @@ export function FulfillmentBadge({ fulfillment }: { fulfillment: PosFulfillment 
 }
 
 function shortLocation(location: string) {
-  const part = location.split(/[–—-]/).pop()?.trim()
-  return (part || location).toUpperCase()
+  return (location.split(/[–—]/)[0] ?? location).trim()
 }
 
 export function Chip({ children }: { children: string }) {
   return (
     <span
-      className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em]"
+      className="inline-flex shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em]"
       style={{ background: 'var(--pos-chip)', color: 'var(--pos-ink)' }}
     >
       {children}
@@ -85,7 +84,7 @@ export function StatusRemarks({ order }: { order: PosOrder }) {
   const note = [order.customization.notes, order.customization.addOns].filter(Boolean)[0]
   return (
     <div className="space-y-1.5 text-xs" data-testid="order-remarks">
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-1">
         <StatusBadge status={order.status} />
         {order.location ? <Chip>{shortLocation(order.location)}</Chip> : null}
         <FulfillmentBadge fulfillment={order.fulfillment} />

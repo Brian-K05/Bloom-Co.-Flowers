@@ -148,30 +148,21 @@ html[data-pos-theme='studio-grid'] {
 }
 
 .pos-sheet {
+  width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
 }
 
 .pos-sheet th,
 .pos-sheet td {
-  border: 1px solid var(--pos-line);
-  background: var(--pos-surface);
+  border: 0;
+  border-bottom: 1px solid var(--pos-line);
+  background: transparent;
+  vertical-align: top;
 }
 
 .pos-sheet thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: color-mix(in oklab, var(--pos-bg) 55%, var(--pos-surface));
-}
-
-.pos-sheet .pos-sheet-sticky {
-  position: sticky;
-  left: 0;
-  z-index: 1;
-}
-
-.pos-sheet thead .pos-sheet-sticky {
-  z-index: 3;
+  background: transparent;
 }
 
 .pos-btn {

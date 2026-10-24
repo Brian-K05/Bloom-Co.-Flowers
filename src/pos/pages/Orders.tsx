@@ -277,7 +277,7 @@ export function PosOrdersPage() {
           <p className="mt-1 text-base" style={{ color: 'var(--pos-muted)' }}>
             {theme.layout === 'kanban'
               ? 'Tap a card to open the order.'
-              : 'Spreadsheet of today’s work — slide sideways to see amount and remarks.'}
+              : 'One row per order. Amount and payment sit on the right.'}
           </p>
         </div>
         <button
@@ -293,10 +293,10 @@ export function PosOrdersPage() {
 
       <div className="pos-surface mt-5 min-w-0">
         <div
-          className="flex flex-wrap items-center justify-between gap-3 border-b px-5 py-3 text-sm"
+          className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b px-5 py-3 text-sm"
           style={{ borderColor: 'var(--pos-line)' }}
         >
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <p className="font-semibold">Schedule</p>
             <span
               className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
@@ -304,13 +304,15 @@ export function PosOrdersPage() {
             >
               {filtered.length} visible
             </span>
-            <span style={{ color: 'var(--pos-muted)' }}>| {scheduleCaption}</span>
+            <span className="truncate" style={{ color: 'var(--pos-muted)' }}>
+              | {scheduleCaption}
+            </span>
           </div>
-          <div className="flex flex-wrap items-center gap-3" style={{ color: 'var(--pos-muted)' }}>
+          <div className="flex shrink-0 flex-wrap items-center gap-3" style={{ color: 'var(--pos-muted)' }}>
             <span>
               {filtered.length} order{filtered.length === 1 ? '' : 's'}
             </span>
-            <span className="font-semibold" style={{ color: 'var(--pos-ink)' }}>
+            <span className="font-semibold whitespace-nowrap" style={{ color: 'var(--pos-ink)' }}>
               {formatPHP(scheduledValue)} scheduled value
             </span>
             <button type="button" className="pos-btn pos-btn-secondary !min-h-8 !px-3 text-xs" onClick={exportList}>
